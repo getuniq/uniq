@@ -1,0 +1,10 @@
+{
+  "name": "@getuniq/cli",
+  "version": "0.1.0",
+  "description": "Uniq CLI — two URLs in, a closing kit out (JSON). The artifact layer for outbound agent pipelines.",
+  "license": "AGPL-3.0-only",
+  "repository": { "type": "git", "url": "https://github.com/getuniq/uniq", "directory": "cli" },
+  "bin": { "uniq": "./uniq.mjs" },
+  "engines": { "node": ">=18" },
+  "keywords": ["proposal", "outbound", "sales", "agent", "mcp", "n8n", "clay", "gtm"]
+}
