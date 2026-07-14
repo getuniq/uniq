@@ -6,17 +6,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createProposal } from "@/lib/engine";
 import { getProposal, getEngagement } from "@/lib/store";
+import { resolveApiKey, chargeProposal } from "@/lib/users";
 
 export const maxDuration = 300;
 
-function authorized(req: NextRequest): boolean {
-  const required = process.env.UNIQ_API_KEY;
-  if (!required) return true;
-  return req.headers.get("authorization") === `Bearer ${required}`;
-}
-
 export async function POST(req: NextRequest): Promise<NextResponse> {
-  if (!authorized(req)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const auth = await resolveApiKey(req.headers.get("authorization"));
+  if (auth.kind === "invalid") return NextResponse.json({ error: "Unauthorized — sign up at uniq.team for a free API key" }, { status: 401 });
+  if (auth.kind === "user") {
+    const charge = await chargeProposal(auth.user);
+    if (!charge.ok) {
+      return NextResponse.json({ error: "Free proposals used up — upgrade at uniq.team/pricing (or self-host free forever)" }, { status: 402 });
+    }
+  }
   const body = await req.json().catch(() => ({})) as {
     sellerUrl?: string; prospectUrl?: string; focus?: string; refreshSeller?: boolean; webhookUrl?: string;
   };
@@ -39,7 +41,8 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
 // GET /api/proposal?id=… — fetch a generated kit (or ?id=…&engagement=1 for view stats)
 export async function GET(req: NextRequest): Promise<NextResponse> {
-  if (!authorized(req)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const auth = await resolveApiKey(req.headers.get("authorization"));
+  if (auth.kind === "invalid") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const id = req.nextUrl.searchParams.get("id");
   if (!id) return NextResponse.json({ error: "id is required" }, { status: 400 });
   if (req.nextUrl.searchParams.get("engagement")) {

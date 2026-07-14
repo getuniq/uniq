@@ -86,13 +86,13 @@ const mcpHandler = createMcpHandler(
   { basePath: "/api" },
 );
 
-// Same auth model as the REST API: open on self-host by default; when
-// UNIQ_API_KEY is set (hosted), require Authorization: Bearer <key>.
-// MCP clients pass this as a custom header on the server connection.
-function handler(req: Request): Promise<Response> | Response {
-  const required = process.env.UNIQ_API_KEY;
-  if (required && req.headers.get("authorization") !== `Bearer ${required}`) {
-    return new Response(JSON.stringify({ error: "Unauthorized — this hosted MCP endpoint requires an API key" }), {
+// Same auth model as the REST API: open on keyless self-host; hosted accepts
+// the admin key OR any user's API key (from the free signup at uniq.team).
+async function handler(req: Request): Promise<Response> {
+  const { resolveApiKey } = await import("@/lib/users");
+  const auth = await resolveApiKey(req.headers.get("authorization"));
+  if (auth.kind === "invalid") {
+    return new Response(JSON.stringify({ error: "Unauthorized — sign up free at uniq.team for an API key" }), {
       status: 401,
       headers: { "Content-Type": "application/json" },
     });

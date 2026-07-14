@@ -3,17 +3,13 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { editArtifact, type EditableArtifact } from "@/lib/edit";
+import { resolveApiKey } from "@/lib/users";
 
 export const maxDuration = 300;
 
-function authorized(req: NextRequest): boolean {
-  const required = process.env.UNIQ_API_KEY;
-  if (!required) return true;
-  return req.headers.get("authorization") === `Bearer ${required}`;
-}
-
 export async function POST(req: NextRequest): Promise<NextResponse> {
-  if (!authorized(req)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const auth = await resolveApiKey(req.headers.get("authorization"));
+  if (auth.kind === "invalid") return NextResponse.json({ error: "Unauthorized — sign up at uniq.team for a free API key" }, { status: 401 });
   const body = await req.json().catch(() => ({})) as {
     id?: string; artifact?: string; instruction?: string;
   };
