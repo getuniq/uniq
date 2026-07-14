@@ -23,20 +23,31 @@ narrative expressed as three artifacts:
 
 Endpoint: https://uniq.team/api/mcp (streamable HTTP; also self-hostable).
 Tools:
-- create_proposal(seller_url, prospect_url, focus?) → { proposal_id, hosted_proposal_url, email_subject, email_body, narrative }
+- create_proposal(seller_url, prospect_url, focus?, webhook_url?) → { proposal_id, hosted_proposal_url, email_subject, email_body, narrative }
+- edit_artifact(proposal_id, artifact: "email"|"pitch_html"|"proposal", instruction) → regenerates ONE artifact, keeps the narrative
 - get_proposal(proposal_id) → full kit including pitch_html
 - get_engagement(proposal_id) → { views }
 
 ## REST API
 
-POST /api/proposal        { "sellerUrl": "...", "prospectUrl": "...", "focus": "optional steer" }
+POST /api/proposal   { "sellerUrl", "prospectUrl", "focus"?, "webhookUrl"? }
   → { id, proposalUrl, email: {subject, body}, pitchHtml, narrative, prospect }
+POST /api/edit       { "id", "artifact": "email"|"pitch_html"|"proposal", "instruction" }
 GET  /api/proposal?id=ID                → the stored kit
 GET  /api/proposal?id=ID&engagement=1   → { id, views }
+GET  /api/brand?url=SITE                → instant brand extraction (no auth, no LLM): { colors, fonts, logo }
+OpenAPI: https://uniq.team/openapi.yaml
+
+## Webhooks
+
+Pass webhookUrl/webhook_url on create. First open of the hosted page POSTs:
+{ "event": "proposal.viewed", "proposal_id", "prospect_domain", "at" }
+This is the follow-up trigger — act on it.
 
 Auth: none on self-host by default; hosted/cloud requires Authorization: Bearer <key>.
-Generation takes 30-90s (three model calls + two crawls). Seller profiles are cached
-by domain — the first call for a seller is the slow one.
+Rate limits (hosted): generous by design — 60 proposals/hour per key, no burst tricks;
+self-host has none. Generation takes 30-90s (three model calls + two crawls). Seller
+profiles are cached by domain — the first call for a seller is the slow one.
 
 ## CLI
 

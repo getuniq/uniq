@@ -1,0 +1,47 @@
+{
+  "name": "New deal → Uniq closing kit → Slack",
+  "nodes": [
+    {
+      "parameters": {},
+      "name": "When a deal is created (replace with your CRM trigger)",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://uniq.team/api/proposal",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "Bearer {{$env.UNIQ_API_KEY}}" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\"sellerUrl\": \"yoursaas.com\", \"prospectUrl\": \"{{ $json.company_domain }}\", \"webhookUrl\": \"{{ $env.N8N_WEBHOOK_URL }}\"}",
+        "options": { "timeout": 300000 }
+      },
+      "name": "Uniq: generate closing kit",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [500, 300]
+    },
+    {
+      "parameters": {
+        "text": "=Closing kit ready for {{ $json.prospect.company }}\n✉ {{ $json.email.subject }}\n◈ {{ $json.proposalUrl }}",
+        "otherOptions": {}
+      },
+      "name": "Post to Slack (configure credentials)",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2,
+      "position": [760, 300]
+    }
+  ],
+  "connections": {
+    "When a deal is created (replace with your CRM trigger)": { "main": [[{ "node": "Uniq: generate closing kit", "type": "main", "index": 0 }]] },
+    "Uniq: generate closing kit": { "main": [[{ "node": "Post to Slack (configure credentials)", "type": "main", "index": 0 }]] }
+  }
+}

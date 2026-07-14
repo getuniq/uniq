@@ -13,6 +13,7 @@ export interface ProposalRecord {
   prospect_brief: ProspectBrief;
   kit: ClosingKit;
   views: number;
+  webhook_url?: string | null;
   created_at: string;
 }
 
@@ -60,7 +61,19 @@ export async function saveProposal(rec: ProposalRecord): Promise<void> {
     seller_profile: rec.seller_profile,
     prospect_brief: rec.prospect_brief,
     kit: rec.kit,
+    webhook_url: rec.webhook_url ?? null,
   });
+}
+
+/** Replace a proposal's kit after a prompt-based edit. */
+export async function saveProposalKit(id: string, kit: ClosingKit): Promise<void> {
+  const db = supa();
+  if (!db) {
+    const p = mem.proposals.get(id);
+    if (p) p.kit = kit;
+    return;
+  }
+  await db.from("uniq_proposals").update({ kit }).eq("id", id);
 }
 
 export async function getProposal(id: string): Promise<ProposalRecord | null> {
@@ -72,15 +85,48 @@ export async function getProposal(id: string): Promise<ProposalRecord | null> {
 
 export async function recordView(id: string): Promise<void> {
   const db = supa();
+  let firstView = false;
   if (!db) {
     const p = mem.proposals.get(id);
-    if (p) p.views++;
-    return;
+    if (p) { firstView = p.views === 0; p.views++; }
+  } else {
+    const before = await getProposal(id);
+    firstView = (before?.views ?? 0) === 0;
+    await db.rpc("uniq_increment_views", { proposal_id: id }).then(
+      () => undefined,
+      () => undefined, // view tracking is best-effort, never breaks the page
+    );
   }
-  await db.rpc("uniq_increment_views", { proposal_id: id }).then(
-    () => undefined,
-    () => undefined, // view tracking is best-effort, never breaks the page
-  );
+  // Engagement webhook — the signal an outbound agent acts on ("they opened
+  // it → follow up"). Fired on the FIRST view only; best-effort.
+  if (firstView) {
+    const p = await getProposal(id);
+    if (p?.webhook_url) {
+      fetch(p.webhook_url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          event: "proposal.viewed",
+          proposal_id: id,
+          prospect_domain: p.prospect_domain,
+          at: new Date().toISOString(),
+        }),
+        signal: AbortSignal.timeout(5000),
+      }).catch(() => undefined);
+    }
+  }
+}
+
+/** Daily global playground counter — returns the new count, or null when no DB. */
+export async function bumpPlaygroundUsage(): Promise<number | null> {
+  const db = supa();
+  if (!db) return null;
+  const day = new Date().toISOString().slice(0, 10);
+  await db.from("uniq_usage").upsert({ day }, { onConflict: "day", ignoreDuplicates: true });
+  const { data } = await db.from("uniq_usage").select("playground").eq("day", day).maybeSingle();
+  const next = ((data?.playground as number) ?? 0) + 1;
+  await db.from("uniq_usage").update({ playground: next }).eq("day", day);
+  return next;
 }
 
 export async function getEngagement(id: string): Promise<{ id: string; views: number } | null> {

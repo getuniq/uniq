@@ -18,7 +18,7 @@ function authorized(req: NextRequest): boolean {
 export async function POST(req: NextRequest): Promise<NextResponse> {
   if (!authorized(req)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const body = await req.json().catch(() => ({})) as {
-    sellerUrl?: string; prospectUrl?: string; focus?: string; refreshSeller?: boolean;
+    sellerUrl?: string; prospectUrl?: string; focus?: string; refreshSeller?: boolean; webhookUrl?: string;
   };
   if (!body.sellerUrl || !body.prospectUrl) {
     return NextResponse.json({ error: "sellerUrl and prospectUrl are required" }, { status: 400 });
@@ -29,6 +29,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       prospectUrl: body.prospectUrl,
       focus: body.focus,
       refreshSeller: body.refreshSeller,
+      webhookUrl: body.webhookUrl,
     });
     return NextResponse.json(result);
   } catch (e) {

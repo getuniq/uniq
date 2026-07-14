@@ -1,0 +1,7 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Uniq mark: a "u" drawn as fingerprint ridges — every proposal unique to its prospect.
+       The dot is the close. -->
+  <path d="M14 14 V34 a18 18 0 0 0 36 0 V14" stroke="#7C3AED" stroke-width="5.5" stroke-linecap="round" fill="none"/>
+  <path d="M24 14 V33 a8 8 0 0 0 16 0 V14" stroke="#A78BFA" stroke-width="5" stroke-linecap="round" fill="none"/>
+  <circle cx="32" cy="53.5" r="4.5" fill="#10B981"/>
+</svg>

@@ -1,0 +1,96 @@
+openapi: 3.1.0
+info:
+  title: Uniq API
+  version: 0.2.0
+  description: >
+    The open-source, agent-native proposal engine. Two URLs in, a closing kit out:
+    a personalized email, an HTML pitch page, and a hosted proposal page in the
+    prospect's own branding. https://uniq.team · AGPL-3.0.
+servers:
+  - url: https://uniq.team
+security:
+  - bearer: []
+paths:
+  /api/proposal:
+    post:
+      summary: Create a closing kit from two URLs
+      operationId: createProposal
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [sellerUrl, prospectUrl]
+              properties:
+                sellerUrl: { type: string, description: "Seller website (cached as a profile by domain)" }
+                prospectUrl: { type: string, description: "Prospect website (crawled fresh, brand extracted)" }
+                focus: { type: string, description: "Optional steer, e.g. 'lead with the API angle'" }
+                webhookUrl: { type: string, description: "POSTed { event: proposal.viewed, ... } on first page open" }
+                refreshSeller: { type: boolean }
+      responses:
+        "200":
+          description: The closing kit
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id: { type: string }
+                  proposalUrl: { type: string }
+                  narrative: { type: string }
+                  email:
+                    type: object
+                    properties: { subject: { type: string }, body: { type: string } }
+                  pitchHtml: { type: string }
+                  prospect:
+                    type: object
+                    properties: { company: { type: string }, domain: { type: string } }
+    get:
+      summary: Fetch a stored kit, or its engagement stats with engagement=1
+      operationId: getProposal
+      parameters:
+        - { name: id, in: query, required: true, schema: { type: string } }
+        - { name: engagement, in: query, schema: { type: string, enum: ["1"] } }
+      responses:
+        "200": { description: Kit or `{ id, views }` }
+  /api/edit:
+    post:
+      summary: Prompt-based edit of one artifact (keeps the shared narrative)
+      operationId: editArtifact
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [id, artifact, instruction]
+              properties:
+                id: { type: string }
+                artifact: { type: string, enum: [email, pitch_html, proposal] }
+                instruction: { type: string, description: "Plain language, e.g. 'shorten to 80 words'" }
+      responses:
+        "200": { description: The updated artifact }
+  /api/brand:
+    get:
+      summary: Instant brand extraction (no auth, no LLM)
+      operationId: extractBrand
+      security: []
+      parameters:
+        - { name: url, in: query, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: Brand tokens
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  domain: { type: string }
+                  title: { type: string }
+                  colors: { type: array, items: { type: string } }
+                  fonts: { type: array, items: { type: string } }
+                  logo: { type: [string, "null"] }
+components:
+  securitySchemes:
+    bearer: { type: http, scheme: bearer }

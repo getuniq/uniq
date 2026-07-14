@@ -1,0 +1,61 @@
+<svg width="1200" height="320" viewBox="0 0 1200 320" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1200" y2="320" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0E1116"/>
+      <stop offset="1" stop-color="#1A1030"/>
+    </linearGradient>
+    <linearGradient id="iris" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#7C3AED"/>
+      <stop offset="1" stop-color="#C026D3"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="320" rx="16" fill="url(#bg)"/>
+
+  <!-- subtle ridge texture (fingerprint motif) -->
+  <g opacity="0.08" stroke="#A78BFA" stroke-width="2" fill="none">
+    <path d="M1020 340 a150 150 0 0 1 300 0"/>
+    <path d="M1050 340 a120 120 0 0 1 240 0"/>
+    <path d="M1080 340 a90 90 0 0 1 180 0"/>
+    <path d="M-40 -30 a150 150 0 0 0 300 0"/>
+    <path d="M-10 -30 a120 120 0 0 0 240 0"/>
+  </g>
+
+  <!-- mark -->
+  <g transform="translate(84,92)">
+    <path d="M0 0 V40 a34 34 0 0 0 68 0 V0" stroke="url(#iris)" stroke-width="11" stroke-linecap="round" fill="none"/>
+    <path d="M19 0 V38 a15 15 0 0 0 30 0 V0" stroke="#A78BFA" stroke-width="9" stroke-linecap="round" fill="none"/>
+    <circle cx="34" cy="106" r="9" fill="#10B981"/>
+  </g>
+
+  <!-- wordmark + tagline -->
+  <text x="200" y="158" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, sans-serif" font-size="72" font-weight="800" letter-spacing="-3" fill="#F9FAFB">uniq<tspan fill="#A78BFA">.</tspan></text>
+  <text x="204" y="204" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, sans-serif" font-size="27" font-weight="600" fill="#E5E7EB">Two URLs in. A closing kit out.</text>
+  <text x="204" y="236" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, sans-serif" font-size="18" fill="#9CA3AF">The open-source, agent-native proposal engine — MCP · API · CLI</text>
+
+  <!-- flow: two urls → three artifacts -->
+  <g font-family="ui-monospace, Menlo, monospace" font-size="15">
+    <rect x="700" y="70" width="180" height="34" rx="8" fill="#1F2430" stroke="#374151"/>
+    <text x="716" y="92" fill="#A78BFA">yoursaas.com</text>
+    <rect x="700" y="112" width="180" height="34" rx="8" fill="#1F2430" stroke="#374151"/>
+    <text x="716" y="134" fill="#A78BFA">prospect.com</text>
+    <path d="M892 108 h44" stroke="#6B7280" stroke-width="2"/>
+    <path d="M930 101 l12 7 -12 7z" fill="#6B7280"/>
+    <rect x="948" y="52" width="176" height="34" rx="8" fill="#12161f" stroke="#7C3AED"/>
+    <text x="964" y="74" fill="#E5E7EB">✉ the email</text>
+    <rect x="948" y="94" width="176" height="34" rx="8" fill="#12161f" stroke="#7C3AED"/>
+    <text x="964" y="116" fill="#E5E7EB">▤ the pitch</text>
+    <rect x="948" y="136" width="176" height="34" rx="8" fill="#12161f" stroke="#10B981"/>
+    <text x="964" y="158" fill="#E5E7EB">◈ the close</text>
+    <text x="948" y="196" fill="#6B7280" font-size="13">…in the prospect's own branding</text>
+  </g>
+
+  <!-- badges row -->
+  <g font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="14" font-weight="600">
+    <rect x="204" y="256" width="92" height="26" rx="13" fill="#7C3AED22" stroke="#7C3AED"/>
+    <text x="222" y="274" fill="#C4B5FD">AGPL-3.0</text>
+    <rect x="306" y="256" width="118" height="26" rx="13" fill="#10B98122" stroke="#10B981"/>
+    <text x="324" y="274" fill="#6EE7B7">agent-native</text>
+    <rect x="434" y="256" width="150" height="26" rx="13" fill="#1F2430" stroke="#4B5563"/>
+    <text x="452" y="274" fill="#D1D5DB">mcp.uniq.team</text>
+  </g>
+</svg>

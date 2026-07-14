@@ -5,6 +5,7 @@
 import { createMcpHandler } from "mcp-handler";
 import { z } from "zod";
 import { createProposal } from "@/lib/engine";
+import { editArtifact } from "@/lib/edit";
 import { getEngagement, getProposal } from "@/lib/store";
 
 const mcpHandler = createMcpHandler(
@@ -16,9 +17,10 @@ const mcpHandler = createMcpHandler(
         seller_url: z.string().describe("The seller's website URL (your product/company)"),
         prospect_url: z.string().describe("The prospect's website URL (who you're selling to)"),
         focus: z.string().optional().describe("Optional steer, e.g. 'lead with the API angle' or 'position for their agency clients'"),
+        webhook_url: z.string().optional().describe("URL to POST { event: 'proposal.viewed', proposal_id, prospect_domain, at } when the prospect first opens the hosted page — your follow-up trigger"),
       },
-      async ({ seller_url, prospect_url, focus }) => {
-        const r = await createProposal({ sellerUrl: seller_url, prospectUrl: prospect_url, focus });
+      async ({ seller_url, prospect_url, focus, webhook_url }) => {
+        const r = await createProposal({ sellerUrl: seller_url, prospectUrl: prospect_url, focus, webhookUrl: webhook_url });
         return {
           content: [{
             type: "text" as const,
@@ -49,6 +51,23 @@ const mcpHandler = createMcpHandler(
             text: JSON.stringify({ id: p.id, email: p.kit.email, narrative: p.kit.narrative, pitch_html: p.kit.pitch_html }, null, 2),
           }],
         };
+      },
+    );
+
+    server.tool(
+      "edit_artifact",
+      "Prompt-based editing of one artifact of an existing proposal — 'shorten the email', 'lead with the ROI angle', 'make pricing concrete'. Regenerates only that artifact, keeping the shared narrative.",
+      {
+        proposal_id: z.string(),
+        artifact: z.enum(["email", "pitch_html", "proposal"]).describe("email = the outreach email · pitch_html = the HTML one-pager · proposal = the hosted page content"),
+        instruction: z.string().describe("What to change, in plain language"),
+      },
+      async ({ proposal_id, artifact, instruction }) => {
+        const r = await editArtifact(proposal_id, artifact, instruction);
+        const payload = artifact === "email" ? r.kit.email
+          : artifact === "pitch_html" ? { pitch_html_length: r.kit.pitch_html.length, note: "fetch full HTML with get_proposal" }
+          : r.kit.proposal;
+        return { content: [{ type: "text" as const, text: JSON.stringify({ id: r.id, artifact, updated: payload }, null, 2) }] };
       },
     );
 

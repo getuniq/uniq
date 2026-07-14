@@ -11,6 +11,7 @@ export interface CreateProposalInput {
   prospectUrl: string;
   focus?: string;          // optional operator steer ("lead with the API angle")
   refreshSeller?: boolean; // bypass the cached seller profile
+  webhookUrl?: string;     // POSTed { event: "proposal.viewed", ... } on first view
 }
 
 export interface CreateProposalOutput {
@@ -58,6 +59,7 @@ export async function createProposal(input: CreateProposalInput): Promise<Create
     prospect_brief: prospect,
     kit,
     views: 0,
+    webhook_url: input.webhookUrl ?? null,
     created_at: new Date().toISOString(),
   });
 
