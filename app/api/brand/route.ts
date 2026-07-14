@@ -4,12 +4,15 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { crawlSite, pickLogo } from "@/lib/crawl";
+import { bumpUsage } from "@/lib/store";
 
 export const maxDuration = 60;
 
 export async function GET(req: NextRequest): Promise<NextResponse> {
   const url = req.nextUrl.searchParams.get("url");
   if (!url) return NextResponse.json({ error: "url is required" }, { status: 400 });
+  const used = await bumpUsage("brand");
+  if (used !== null && used > 400) return NextResponse.json({ error: "Rate limited — try again tomorrow" }, { status: 429 });
   try {
     const site = await crawlSite(url);
     const logo = await pickLogo(site.logoCandidates.slice(0, 4));

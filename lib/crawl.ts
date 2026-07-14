@@ -65,7 +65,36 @@ function collectFonts(css: string, out: Set<string>): void {
   }
 }
 
+/**
+ * SSRF guard — the crawler fetches attacker-supplied URLs, so private ranges,
+ * localhost, and cloud metadata endpoints are hard-blocked. Applied to crawl
+ * targets AND webhook URLs.
+ */
+export function assertPublicUrl(raw: string): void {
+  const u = new URL(/^https?:\/\//.test(raw) ? raw : `https://${raw}`);
+  if (!/^https?:$/.test(u.protocol)) throw new Error("Only http(s) URLs are allowed");
+  const h = u.hostname.toLowerCase();
+  const blockedHost =
+    h === "localhost" || h.endsWith(".localhost") || h.endsWith(".local") ||
+    h.endsWith(".internal") || h.endsWith(".lan") || h === "metadata.google.internal";
+  const ipv4 = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/.exec(h);
+  let blockedIp = false;
+  if (ipv4) {
+    const [a, b] = [parseInt(ipv4[1], 10), parseInt(ipv4[2], 10)];
+    blockedIp =
+      a === 0 || a === 10 || a === 127 ||                       // this-net, private, loopback
+      (a === 100 && b >= 64 && b <= 127) ||                     // CGNAT
+      (a === 169 && b === 254) ||                               // link-local + cloud metadata
+      (a === 172 && b >= 16 && b <= 31) ||
+      (a === 192 && b === 168) ||
+      a >= 224;                                                 // multicast/reserved
+  }
+  const blockedIpv6 = h.includes(":") && (h === "::1" || h.startsWith("fe80") || h.startsWith("fc") || h.startsWith("fd"));
+  if (blockedHost || blockedIp || blockedIpv6) throw new Error("URL points at a private or internal address");
+}
+
 async function fetchText(url: string, timeoutMs = 12000): Promise<string> {
+  assertPublicUrl(url);
   const res = await fetch(url, {
     headers: { "User-Agent": UA, Accept: "text/html,application/xhtml+xml,text/css,*/*" },
     signal: AbortSignal.timeout(timeoutMs),

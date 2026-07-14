@@ -319,3 +319,15 @@ body {
 .pv-stat:hover { transform: translateY(-4px); }
 .pv-stat b { display: block; font-size: 1.9rem; letter-spacing: -1px; color: var(--brand); }
 .pv-stat span { color: var(--ink-soft); font-size: 0.85rem; }
+
+/* ─── Staged loader ───────────────────────────────────────────────────── */
+.sloader { display: flex; align-items: center; gap: 0.9rem; background: var(--brand-soft); border-radius: 12px; padding: 0.9rem 1.2rem; margin-top: 1rem; position: relative; overflow: hidden; }
+.sloader-ring { width: 22px; height: 22px; border-radius: 50%; border: 3px solid #c4b5fd; border-top-color: var(--brand); animation: sl-spin 0.9s linear infinite; flex-shrink: 0; }
+@keyframes sl-spin { to { transform: rotate(360deg); } }
+.sloader-text { display: flex; flex-direction: column; }
+.sloader-text strong { font-size: 0.95rem; color: var(--brand); animation: step-in 0.4s var(--ease-out) both; }
+.sloader-text span { font-size: 0.78rem; color: var(--ink-soft); }
+.sloader-bar { position: absolute; bottom: 0; left: 0; right: 0; height: 3px; background: #ddd6fe; }
+.sloader-bar i { display: block; height: 100%; width: 40%; background: var(--brand); animation: sl-slide 1.6s var(--ease-out) infinite; }
+@keyframes sl-slide { from { transform: translateX(-100%); } to { transform: translateX(350%); } }
+@media (prefers-reduced-motion: reduce) { .sloader-ring, .sloader-bar i { animation: none; } }

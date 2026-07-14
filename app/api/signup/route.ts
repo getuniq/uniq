@@ -16,6 +16,9 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     const domain = new URL(/^https?:\/\//.test(body.sellerUrl) ? body.sellerUrl : `https://${body.sellerUrl}`)
       .hostname.replace(/^www\./, "");
     const user = await signupUser(body.email, domain);
+    if (user.verified === false) {
+      return NextResponse.json({ needsVerification: true, email: user.email });
+    }
     return NextResponse.json({
       apiKey: user.api_key,
       email: user.email,

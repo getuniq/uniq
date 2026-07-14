@@ -32,6 +32,11 @@ export function baseUrl(): string {
 }
 
 export async function createProposal(input: CreateProposalInput): Promise<CreateProposalOutput> {
+  // Webhooks are outbound POSTs to caller-supplied URLs — same SSRF rules as crawling.
+  if (input.webhookUrl) {
+    const { assertPublicUrl } = await import("./crawl");
+    assertPublicUrl(input.webhookUrl);
+  }
   // 1. Seller profile — cached by domain; a seller crawls once, sells many times.
   const sellerDomain = new URL(/^https?:\/\//.test(input.sellerUrl) ? input.sellerUrl : `https://${input.sellerUrl}`)
     .hostname.replace(/^www\./, "");
@@ -39,6 +44,12 @@ export async function createProposal(input: CreateProposalInput): Promise<Create
   if (!seller) {
     const sellerSite = await crawlSite(input.sellerUrl);
     seller = await buildSellerProfile(sellerSite);
+    // Sender identity survives on every artifact: brand tokens come from the
+    // crawl, not the LLM.
+    seller.brand = {
+      primary_color: sellerSite.colorCandidates[0] ?? "#111827",
+      logo_url: await pickLogo(sellerSite.logoCandidates.slice(0, 4)),
+    };
     await saveSellerProfile(sellerDomain, seller);
   }
 

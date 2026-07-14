@@ -117,17 +117,18 @@ export async function recordView(id: string): Promise<void> {
   }
 }
 
-/** Daily global playground counter — returns the new count, or null when no DB. */
-export async function bumpPlaygroundUsage(): Promise<number | null> {
+/** Daily global counters for unauthenticated endpoints — cost control. */
+export async function bumpUsage(kind: "playground" | "profile" | "brand"): Promise<number | null> {
   const db = supa();
   if (!db) return null;
   const day = new Date().toISOString().slice(0, 10);
   await db.from("uniq_usage").upsert({ day }, { onConflict: "day", ignoreDuplicates: true });
-  const { data } = await db.from("uniq_usage").select("playground").eq("day", day).maybeSingle();
-  const next = ((data?.playground as number) ?? 0) + 1;
-  await db.from("uniq_usage").update({ playground: next }).eq("day", day);
+  const { data } = await db.from("uniq_usage").select(kind).eq("day", day).maybeSingle();
+  const next = (((data as Record<string, number> | null)?.[kind]) ?? 0) + 1;
+  await db.from("uniq_usage").update({ [kind]: next }).eq("day", day);
   return next;
 }
+export const bumpPlaygroundUsage = () => bumpUsage("playground");
 
 export async function getEngagement(id: string): Promise<{ id: string; views: number } | null> {
   const p = await getProposal(id);

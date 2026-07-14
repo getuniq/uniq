@@ -5,11 +5,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { crawlSite, pickLogo } from "@/lib/crawl";
 import { buildSellerProfile } from "@/lib/generate";
-import { saveSellerProfile } from "@/lib/store";
+import { saveSellerProfile, bumpUsage } from "@/lib/store";
 
 export const maxDuration = 120;
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
+  const used = await bumpUsage("profile");
+  if (used !== null && used > (parseInt(process.env.UNIQ_PROFILE_DAILY_CAP ?? "40", 10) || 40)) {
+    return NextResponse.json({ error: "Signups are rate-limited right now — try again tomorrow or self-host (github.com/getuniq/uniq)." }, { status: 429 });
+  }
   const body = await req.json().catch(() => ({})) as { sellerUrl?: string };
   if (!body.sellerUrl) return NextResponse.json({ error: "sellerUrl is required" }, { status: 400 });
   try {
@@ -18,6 +22,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       buildSellerProfile(site),
       pickLogo(site.logoCandidates.slice(0, 4)),
     ]);
+    profile.brand = { primary_color: site.colorCandidates[0] ?? "#111827", logo_url: logo };
     await saveSellerProfile(site.domain, profile);
     return NextResponse.json({
       domain: site.domain,

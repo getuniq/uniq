@@ -12,6 +12,32 @@ export interface UniqUser {
   api_key: string;
   proposals_used: number;
   proposals_cap: number;
+  verified?: boolean;
+  verify_code?: string | null;
+}
+
+/** Send the 6-digit verification code via Resend (best-effort; env-gated). */
+async function sendVerifyEmail(email: string, code: string): Promise<boolean> {
+  const key = process.env.RESEND_API_KEY;
+  if (!key) return false; // no mailer configured → caller falls back to auto-verify
+  try {
+    const res = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        from: process.env.UNIQ_EMAIL_FROM ?? "Uniq <onboarding@resend.dev>",
+        to: [email],
+        subject: `${code} — your Uniq code`,
+        text: `Your Uniq verification code is: ${code}
+
+Paste it back on uniq.team/start and your API key is yours.
+
+— Uniq, the open-source proposal engine`,
+      }),
+      signal: AbortSignal.timeout(10000),
+    });
+    return res.ok;
+  } catch { return false; }
 }
 
 function supa(): SupabaseClient | null {
@@ -27,8 +53,18 @@ export async function signupUser(email: string, domain: string): Promise<UniqUse
   const clean = email.trim().toLowerCase();
 
   const { data: existing } = await db.from("uniq_users").select("*").eq("email", clean).maybeSingle();
-  if (existing) return existing as UniqUser; // idempotent — returning users get their key back
+  if (existing) {
+    // Returning user → magic-code login. Never reveal the key without proving
+    // email ownership (otherwise anyone could claim any account by re-signing up).
+    const user = existing as UniqUser;
+    const code = String(Math.floor(100000 + Math.random() * 900000));
+    const sent = await sendVerifyEmail(clean, code);
+    if (!sent) return user; // no mailer configured → self-host convenience
+    await db.from("uniq_users").update({ verify_code: code }).eq("id", user.id);
+    return { ...user, verify_code: code, verified: false }; // signal: code required
+  }
 
+  const code = String(Math.floor(100000 + Math.random() * 900000));
   const user: UniqUser = {
     id: newId(),
     email: clean,
@@ -36,10 +72,29 @@ export async function signupUser(email: string, domain: string): Promise<UniqUse
     api_key: `uq_${newId()}${newId()}`,
     proposals_used: 0,
     proposals_cap: 5,
+    verified: false,
+    verify_code: code,
   };
+  const sent = await sendVerifyEmail(clean, code);
+  if (!sent) { user.verified = true; user.verify_code = null; } // no mailer → don't lock users out
   const { error } = await db.from("uniq_users").insert(user);
   if (error) throw new Error(`Signup failed: ${error.message}`);
   return user;
+}
+
+/** Check a verification code; on match, mark verified and return the user. */
+export async function verifyUser(email: string, code: string): Promise<UniqUser | null> {
+  const db = supa();
+  if (!db) return null;
+  const { data } = await db.from("uniq_users").select("*").eq("email", email.trim().toLowerCase()).maybeSingle();
+  const user = data as UniqUser | null;
+  if (!user) return null;
+  if (user.verify_code) {
+    if (user.verify_code !== code.trim()) return null;
+    await db.from("uniq_users").update({ verified: true, verify_code: null }).eq("id", user.id);
+    return { ...user, verified: true, verify_code: null };
+  }
+  return user.verified ? user : null;
 }
 
 /** Resolve a bearer key: admin env key → unlimited; user key → cap-checked. */
@@ -53,7 +108,10 @@ export async function resolveApiKey(bearer: string | null): Promise<
   const db = supa();
   if (!db) return { kind: "invalid" };
   const { data } = await db.from("uniq_users").select("*").eq("api_key", token).maybeSingle();
-  return data ? { kind: "user", user: data as UniqUser } : { kind: "invalid" };
+  if (!data) return { kind: "invalid" };
+  const user = data as UniqUser;
+  if (user.verified === false) return { kind: "invalid" }; // unverified keys don't work yet
+  return { kind: "user", user };
 }
 
 export async function chargeProposal(user: UniqUser): Promise<{ ok: boolean; remaining: number }> {
