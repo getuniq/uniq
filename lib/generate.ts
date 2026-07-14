@@ -244,5 +244,5 @@ best closer collaborated on it.
 
 The hosted proposal will live at ${proposalUrl} — the email may reference "a one-pager I put
 together for ${prospect.company}" but must not include the raw URL.`,
-    ClosingKitSchema, 8000);
+    ClosingKitSchema, 14000);
 }

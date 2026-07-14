@@ -159,6 +159,10 @@ export default function Start() {
                   {copied ? "Copied ✓" : "Copy"}
                 </button>
               </div>
+              <p className="demo-note" style={{ marginTop: "0.7rem" }}>
+                ⚡ Pro move: <a href="/refine">take the 3-minute pitch interview</a> — it adds what
+                no crawler can see, and every kit after it gets sharper.
+              </p>
               <pre className="snippetpre">{`# any MCP client (Claude Code, Cursor, ...)
 claude mcp add --transport http uniq https://uniq.team/api/mcp \\
   --header "Authorization: Bearer ${account.apiKey.slice(0, 8)}…"`}</pre>

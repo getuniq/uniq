@@ -7,6 +7,7 @@
 import { getProposal, recordView } from "@/lib/store";
 import ProposalFx from "@/components/ProposalFx";
 import BrandLogo from "@/components/BrandLogo";
+import AskBox from "@/components/AskBox";
 import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
@@ -145,6 +146,15 @@ export default async function ProposalPage({ params }: Props) {
         .pp footer { padding: 1.2rem; text-align: center; font-size: 0.8rem; color: ${V.soft}; }
         .pp footer a { color: ${V.soft}; }
 
+        .pp .askbox { background: ${V.cardBg}; border: 1.5px solid ${V.line}; border-radius: 14px; padding: 1.3rem 1.5rem; max-width: 640px; margin: 0 auto; }
+        .pp .askbox-title { font-family: ${font}; font-weight: 700; margin-bottom: 0.7rem; color: ${V.ink}; }
+        .pp .askbox textarea, .pp .askbox input { width: 100%; border: 1.5px solid ${V.line}; border-radius: 9px; padding: 0.65rem 0.9rem; font-size: 0.95rem; font-family: inherit; background: ${variant === "midnight" ? "#0c0e12" : "#fff"}; color: ${V.ink}; resize: vertical; }
+        .pp .askbox-row { display: flex; gap: 0.6rem; margin-top: 0.6rem; }
+        .pp .askbox-row button { color: #fff; border: 0; border-radius: 9px; padding: 0.65rem 1.5rem; font-weight: 700; cursor: pointer; }
+        .pp .askbox-row button:disabled { opacity: 0.6; }
+        .pp .askbox-err { color: #dc2626; font-size: 0.85rem; margin-top: 0.5rem; }
+        .pp .askbox-done { text-align: center; font-weight: 600; color: ${accent}; padding: 1rem; }
+
         .js .pp-reveal { opacity: 0; transform: translateY(22px); transition: opacity 0.6s ease, transform 0.6s ease; }
         .js .pp-reveal.in { opacity: 1; transform: none; }
         @media (prefers-reduced-motion: reduce) {
@@ -239,6 +249,10 @@ export default async function ProposalPage({ params }: Props) {
             {pr.cta.label}
           </a>
           <p className="ctasub">{pr.cta.sub}</p>
+        </div>
+
+        <div className="reveal pp-reveal" style={{ paddingBottom: "3rem" }}>
+          <AskBox proposalId={id} primary={primary} sellerName={seller.company} />
         </div>
       </div>
 
