@@ -3,7 +3,7 @@
 // candidates in a few seconds. This is the "watch us pull their brand" moment.
 
 import { NextRequest, NextResponse } from "next/server";
-import { crawlSite } from "@/lib/crawl";
+import { crawlSite, pickLogo } from "@/lib/crawl";
 
 export const maxDuration = 60;
 
@@ -12,13 +12,14 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
   if (!url) return NextResponse.json({ error: "url is required" }, { status: 400 });
   try {
     const site = await crawlSite(url);
+    const logo = await pickLogo(site.logoCandidates.slice(0, 4));
     return NextResponse.json({
       domain: site.domain,
       title: site.title,
       description: site.description.slice(0, 200),
       colors: site.colorCandidates.slice(0, 5),
       fonts: site.fontCandidates.slice(0, 3),
-      logo: site.logoCandidates[0] ?? null,
+      logo,
     });
   } catch (e) {
     return NextResponse.json({ error: `Couldn't read that site: ${String(e instanceof Error ? e.message : e).slice(0, 120)}` }, { status: 422 });

@@ -2,7 +2,7 @@
 // crawl seller (cached as a profile) + crawl prospect → one narrative,
 // three artifacts → persisted, hosted, returned.
 
-import { crawlSite } from "./crawl";
+import { crawlSite, pickLogo } from "./crawl";
 import { buildSellerProfile, buildProspectBrief, generateClosingKit } from "./generate";
 import { saveSellerProfile, getSellerProfile, saveProposal, newId } from "./store";
 
@@ -45,6 +45,12 @@ export async function createProposal(input: CreateProposalInput): Promise<Create
   // 2. Prospect brief + brand extraction — fresh every time.
   const prospectSite = await crawlSite(input.prospectUrl);
   const prospect = await buildProspectBrief(prospectSite);
+
+  // Never ship an unvalidated logo URL — broken logos read as a broken product.
+  prospect.brand.logo_url = await pickLogo([
+    ...(prospect.brand.logo_url ? [prospect.brand.logo_url] : []),
+    ...prospectSite.logoCandidates,
+  ]);
 
   // 3. One narrative, three artifacts.
   const id = newId();

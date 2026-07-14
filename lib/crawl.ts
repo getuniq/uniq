@@ -75,6 +75,30 @@ async function fetchText(url: string, timeoutMs = 12000): Promise<string> {
   return await res.text();
 }
 
+/**
+ * Server-side logo validation — returns the first candidate that actually
+ * serves an image of plausible logo size. Never trust an unvalidated URL on
+ * a proposal page; a broken logo reads as a broken product.
+ */
+export async function pickLogo(candidates: string[]): Promise<string | null> {
+  for (const url of candidates) {
+    try {
+      const res = await fetch(url, {
+        headers: { "User-Agent": UA, Accept: "image/*" },
+        signal: AbortSignal.timeout(6000),
+        redirect: "follow",
+      });
+      if (!res.ok) continue;
+      const type = res.headers.get("content-type") ?? "";
+      if (!type.startsWith("image/")) continue;
+      const buf = await res.arrayBuffer();
+      if (buf.byteLength < 400) continue; // tracking pixels / empty favicons
+      return url;
+    } catch { /* next candidate */ }
+  }
+  return null;
+}
+
 export async function crawlSite(inputUrl: string): Promise<CrawledSite> {
   const url = /^https?:\/\//.test(inputUrl) ? inputUrl : `https://${inputUrl}`;
   const html = await fetchText(url);
@@ -85,17 +109,26 @@ export async function crawlSite(inputUrl: string): Promise<CrawledSite> {
   const description = meta(html, "description") || meta(html, "og:description");
   const ogImage = meta(html, "og:image") ? absolute(meta(html, "og:image"), url) : null;
 
-  // Logo candidates: explicit logo <img>, apple-touch-icon, og:image, favicon
+  // Logo candidates, best-first. Square marks beat banners: apple-touch-icon
+  // and explicit logo <img> lead; og:image (usually a wide banner) comes last.
+  // Google's favicon service closes the chain — it resolves for ~any domain.
   const logoCandidates: string[] = [];
-  const logoImg = (html.match(/<img[^>]+src=["']([^"']*logo[^"']*)["']/i) ?? [])[1];
-  if (logoImg) { const a = absolute(logoImg, url); if (a) logoCandidates.push(a); }
-  for (const rel of ["apple-touch-icon", "icon", "shortcut icon"]) {
+  for (const rel of ["apple-touch-icon", "apple-touch-icon-precomposed"]) {
+    const re = new RegExp(`<link[^>]+rel=["']${rel}["'][^>]+href=["']([^"']+)["']`, "i");
+    const alt = new RegExp(`<link[^>]+href=["']([^"']+)["'][^>]+rel=["']${rel}["']`, "i");
+    const href = (html.match(re) ?? html.match(alt) ?? [])[1];
+    if (href) { const a = absolute(href, url); if (a) logoCandidates.push(a); }
+  }
+  const logoImg = (html.match(/<img[^>]+src=["']([^"']*logo[^"']*\.(?:svg|png|webp)[^"']*)["']/i) ?? [])[1];
+  if (logoImg) { const a = absolute(logoImg, url); if (a && !logoCandidates.includes(a)) logoCandidates.push(a); }
+  for (const rel of ["icon", "shortcut icon"]) {
     const re = new RegExp(`<link[^>]+rel=["']${rel}["'][^>]+href=["']([^"']+)["']`, "i");
     const alt = new RegExp(`<link[^>]+href=["']([^"']+)["'][^>]+rel=["']${rel}["']`, "i");
     const href = (html.match(re) ?? html.match(alt) ?? [])[1];
     if (href) { const a = absolute(href, url); if (a && !logoCandidates.includes(a)) logoCandidates.push(a); }
   }
   if (ogImage && !logoCandidates.includes(ogImage)) logoCandidates.push(ogImage);
+  logoCandidates.push(`https://www.google.com/s2/favicons?domain=${base.hostname}&sz=128`);
 
   // Colors + fonts: inline HTML plus the first two same-origin stylesheets
   const colorTally = new Map<string, number>();

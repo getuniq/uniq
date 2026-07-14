@@ -6,13 +6,30 @@
 //  · Transparent pricing link, real example proposal as proof.
 
 import BrandDemo from "@/components/BrandDemo";
+import RevealFx from "@/components/RevealFx";
 
 const GITHUB = "https://github.com/getuniq/uniq";
 const EXAMPLE = "/p/on6e1uf29"; // real generated proposal (Vest → Postiz)
 
+const STACK_TOOLS: Array<{ name: string; href?: string }> = [
+  { name: "Clay", href: "/for/clay" },
+  { name: "Apollo", href: "/for/apollo" },
+  { name: "Oxygen", href: "/for/oxygen" },
+  { name: "n8n", href: "/for/n8n" },
+  { name: "Instantly", href: "/for/instantly" },
+  { name: "HubSpot", href: "/for/hubspot" },
+  { name: "Claude Code" },
+  { name: "Cursor" },
+  { name: "Smartlead" },
+  { name: "Make" },
+  { name: "Zapier" },
+  { name: "Attio" },
+];
+
 export default function Landing() {
   return (
     <div className="lp">
+      <RevealFx />
       <nav className="nav">
         <a className="logo" href="/" aria-label="Uniq">
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -41,9 +58,22 @@ export default function Landing() {
         <p className="hero-proof">
           Skeptical? <a href={EXAMPLE}>Here&apos;s a real kit Uniq generated for Postiz</a> — their brand, not ours.
         </p>
+
+        <div className="stackwall" aria-label="Works with your GTM stack">
+          <p className="stackwall-label">The proposal step for your GTM stack</p>
+          <div className="marquee">
+            <div className="marquee-track">
+              {[...STACK_TOOLS, ...STACK_TOOLS].map((t, i) =>
+                t.href
+                  ? <a className="toolchip linked" key={i} href={t.href}>{t.name} →</a>
+                  : <span className="toolchip" key={i}>{t.name}</span>,
+              )}
+            </div>
+          </div>
+        </div>
       </header>
 
-      <section className="section" id="how">
+      <section className="section reveal lp-reveal" id="how">
         <h2>One narrative, three artifacts</h2>
         <p className="lead">Your agents research and sequence. Uniq turns that research into something a buyer says yes to.</p>
         <div className="grid3">
@@ -68,7 +98,7 @@ export default function Landing() {
         </div>
       </section>
 
-      <section className="section" id="stack">
+      <section className="section reveal lp-reveal" id="stack">
         <h2>It sits in your stack. It owns the proposal step.</h2>
         <p className="lead">Uniq doesn&apos;t replace Clay, n8n, or your sequencer — it&apos;s the artifact layer between research and delivery.</p>
         <div className="stackflow">
@@ -103,7 +133,7 @@ export default function Landing() {
         </p>
       </section>
 
-      <section id="oss" className="oss">
+      <section id="oss" className="oss reveal lp-reveal">
         <div>
           <h2>The engine is yours. Forever.</h2>
           <p>
@@ -119,6 +149,7 @@ $ ANTHROPIC_API_KEY=sk-... npm run dev
 `}<span className="g"># your proposal engine, on your infra</span></pre>
       </section>
 
+      <div className="watermark" aria-hidden>uniq.</div>
       <footer className="footer">
         <span>© {new Date().getFullYear()} Uniq — proudly open source</span>
         <span>

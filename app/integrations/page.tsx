@@ -97,6 +97,31 @@ Body     { "sellerUrl": "yoursaas.com", "prospectUrl": "{{$json.domain}}" }
 # the highest-intent moment in outbound — follow up NOW`}</pre>
         </div>
 
+        <div className="integ-block" id="apollo">
+          <h3>Apollo — list export → proposal batch</h3>
+          <p>Any Apollo export with a domain column becomes a batch of branded kits (<a href="/for/apollo">dedicated guide</a>):</p>
+          <pre>{`cat apollo-export.json | jq -r '.[].domain' | while read d; do
+  npx @getuniq/cli propose --seller yoursaas.com --prospect "$d"
+done`}</pre>
+        </div>
+
+        <div className="integ-block" id="reply">
+          <h3>Instantly / Smartlead — reply-triggered proposals</h3>
+          <p>
+            The positive reply is the moment (<a href="/for/instantly">guide</a>). Point the reply webhook at your
+            automation → call Uniq → answer on-thread with the page link. The first cold touch stays link-free.
+          </p>
+        </div>
+
+        <div className="integ-block" id="crm">
+          <h3>HubSpot / Attio / any CRM — workflow webhook</h3>
+          <p>
+            A workflow webhook action calls <code>/api/proposal</code> with the company domain; write
+            <code>proposalUrl</code> back to the deal, route <code>proposal.viewed</code> into stage changes
+            (<a href="/for/hubspot">HubSpot guide</a>). Make and Zapier work the same way — one HTTP module.
+          </p>
+        </div>
+
         <div className="integ-block" id="cli">
           <h3>CLI — any pipeline, any language</h3>
           <pre>{`npx @getuniq/cli propose --seller yoursaas.com --prospect acme.com

@@ -170,19 +170,30 @@ Return JSON:
 
   "email": {
     "subject": under 55 chars, specific, no clickbait, lowercase-natural,
-    "body": 90-140 words, plain text, written in the seller's tone. Structure: one observed specific
-       about the prospect → the narrative in one line → ONE proof point → soft CTA that teases the
-       proposal page WITHOUT pasting a link (deliverability: the link is shared on reply).
-       Sign off as the seller. No "I hope this finds you well".
+    "body": 90-140 words, plain text, written in the seller's tone. THE EMAIL'S JOB IS PROOF OF
+       WORK, not brand. Structure:
+       (1) one VERIFIABLE observation only someone who actually studied ${prospect.company} could
+           make — name a real page, pricing choice, launch, or wording from their site;
+       (2) the POC: one concrete, specific idea or mini-deliverable they could steal today even
+           without ever replying — give real substance, not a teaser;
+       (3) the narrative in one line + ONE proof point;
+       (4) soft CTA that teases the fuller proposal WITHOUT pasting a link (deliverability: the
+           link is shared on reply).
+       Sign off as the seller. No "I hope this finds you well". The reader should think
+       "they already did work for us" — that is the bar.
   },
 
   "pitch_html": a COMPLETE self-contained HTML document (inline CSS only, no external requests,
-     no javascript) — a one-page pitch styled with the PROSPECT's brand tokens
-     (primary ${prospect.brand.primary_color}, accent ${prospect.brand.accent_color},
-     headings '${prospect.brand.heading_font}', system font fallbacks). Max-width 720px, generous
-     whitespace, mobile-safe. Sections: hero (headline speaking to THEIR pain), the narrative,
-     3-4 deliverable cards, proof strip, pricing line, CTA. Professional, restrained — like a
-     designer made it for ${prospect.company}.
+     no javascript) — a one-page pitch that looks like ${prospect.company}'s own design team made
+     it. Brand tokens: primary ${prospect.brand.primary_color}, accent ${prospect.brand.accent_color},
+     headings '${prospect.brand.heading_font}', system fallbacks. DESIGN BAR (non-negotiable):
+     hero with a layered gradient built from the two brand colors (e.g. linear-gradient at 135deg
+     with a translucent radial overlay), an eyebrow label, oversized headline (clamp 2-3rem);
+     deliverables as bordered cards with a 3px brand-color top edge and subtle box-shadow;
+     a proof strip on a tinted background (primary color at ~6% opacity); pricing in a bordered
+     panel; a pill-shaped CTA button in the primary color with generous padding. Max-width 760px
+     centered, 3rem section rhythm, 1.65 line-height, mobile-safe. Restrained wordcount, rich
+     visual hierarchy — no walls of text, no generic corporate filler.
 
   "proposal": {
     "headline": speaks to ${prospect.company}'s outcome, not ${seller.company}'s features,
