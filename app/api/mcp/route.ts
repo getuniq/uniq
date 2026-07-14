@@ -7,7 +7,7 @@ import { z } from "zod";
 import { createProposal } from "@/lib/engine";
 import { getEngagement, getProposal } from "@/lib/store";
 
-const handler = createMcpHandler(
+const mcpHandler = createMcpHandler(
   (server) => {
     server.tool(
       "create_proposal",
@@ -66,5 +66,19 @@ const handler = createMcpHandler(
   {},
   { basePath: "/api" },
 );
+
+// Same auth model as the REST API: open on self-host by default; when
+// UNIQ_API_KEY is set (hosted), require Authorization: Bearer <key>.
+// MCP clients pass this as a custom header on the server connection.
+function handler(req: Request): Promise<Response> | Response {
+  const required = process.env.UNIQ_API_KEY;
+  if (required && req.headers.get("authorization") !== `Bearer ${required}`) {
+    return new Response(JSON.stringify({ error: "Unauthorized — this hosted MCP endpoint requires an API key" }), {
+      status: 401,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+  return mcpHandler(req);
+}
 
 export { handler as GET, handler as POST, handler as DELETE };
