@@ -155,6 +155,13 @@ export default async function ProposalPage({ params }: Props) {
         .pp .askbox-err { color: #dc2626; font-size: 0.85rem; margin-top: 0.5rem; }
         .pp .askbox-done { text-align: center; font-weight: 600; color: ${accent}; padding: 1rem; }
 
+        .pp .uniqbar { display: flex; align-items: center; gap: 1rem; background: #0e1116; color: #9ca3af;
+          padding: 0.5rem 1.2rem; font-size: 0.82rem; border-bottom: 2px dashed #374151; }
+        .pp .uniqbar .ub-home { display: flex; align-items: center; }
+        .pp .uniqbar .ub-note { flex: 1; }
+        .pp .uniqbar .ub-cta { color: #a78bfa; font-weight: 700; text-decoration: none; white-space: nowrap; }
+        .pp .uniqbar .ub-cta:hover { color: #c4b5fd; }
+
         .js .pp-reveal { opacity: 0; transform: translateY(22px); transition: opacity 0.6s ease, transform 0.6s ease; }
         .js .pp-reveal.in { opacity: 1; transform: none; }
         @media (prefers-reduced-motion: reduce) {
@@ -164,6 +171,17 @@ export default async function ProposalPage({ params }: Props) {
       `}</style>
 
       <ProposalFx accent={accent} />
+
+      {/* Uniq preview bar — deliberately NOT in the prospect's brand, so it
+          reads as the platform's frame, never part of the proposal itself. */}
+      <div className="uniqbar" aria-label="Uniq platform bar">
+        <a className="ub-home" href="/">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo-dark.svg" alt="uniq." height={20} />
+        </a>
+        <span className="ub-note">AI-generated proposal — crafted with Uniq</span>
+        <a className="ub-cta" href="/start">Generate yours free →</a>
+      </div>
 
       <header className="hero">
         <div className="wrap">

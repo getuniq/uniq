@@ -64,7 +64,9 @@ export async function createProposal(input: CreateProposalInput): Promise<Create
   ]);
 
   // 3. One narrative, three artifacts.
-  const id = newId();
+  // Readable, shareable id: seller-prospect-suffix ("clay-ramp-x7k2m").
+  const slug = (d: string) => d.split(".")[0].toLowerCase().replace(/[^a-z0-9]+/g, "-").slice(0, 20);
+  const id = `${slug(sellerDomain)}-${slug(prospectSite.domain)}-${newId().slice(0, 5)}`;
   const proposalUrl = `${baseUrl()}/p/${id}`;
   const kit = await generateClosingKit(seller, prospect, proposalUrl, input.focus);
 

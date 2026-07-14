@@ -5,6 +5,7 @@
 //  · Postiz: self-host off the sell; Oxygen: self-playing demos, two-easing motion.
 
 import AppDemo from "@/components/AppDemo";
+import SiteNav from "@/components/SiteNav";
 import RevealFx from "@/components/RevealFx";
 import ExampleCarousel, { type ExampleKit } from "@/components/ExampleCarousel";
 import RotatingAgent from "@/components/RotatingAgent";
@@ -28,31 +29,19 @@ const STACK_TOOLS: Array<{ name: string; href?: string }> = [
   { name: "n8n", href: "/for/n8n" },
   { name: "Instantly", href: "/for/instantly" },
   { name: "HubSpot", href: "/for/hubspot" },
-  { name: "Claude Code" },
-  { name: "Cursor" },
-  { name: "Smartlead" },
-  { name: "Make" },
-  { name: "Zapier" },
-  { name: "Attio" },
+  { name: "Claude Code", href: "/for/claude-code" },
+  { name: "Cursor", href: "/for/cursor" },
+  { name: "Smartlead", href: "/for/smartlead" },
+  { name: "Make", href: "/for/make" },
+  { name: "Zapier", href: "/for/zapier" },
+  { name: "Attio", href: "/for/attio" },
 ];
 
 export default function Landing() {
   return (
     <div className="lp">
       <RevealFx />
-      <nav className="nav">
-        <a className="logo" href="/" aria-label="Uniq">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo.svg" alt="uniq." height={34} />
-        </a>
-        <div className="links">
-          <a href="#examples">Examples</a>
-          <a href="/pricing">Pricing</a>
-          <a href="/integrations">Integrations</a>
-          <a href={GITHUB}>GitHub</a>
-          <a className="cta-nav" href="/start">Start free</a>
-        </div>
-      </nav>
+      <SiteNav />
 
       <header className="hero">
         <span className="badge">Runs in <RotatingAgent /> — or right here</span>

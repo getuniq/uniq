@@ -4,6 +4,7 @@
 // stack (Swan framing), never claim to replace it.
 
 import type { Metadata } from "next";
+import SiteNav from "@/components/SiteNav";
 
 export const metadata: Metadata = {
   title: "Integrations — Uniq in your GTM stack",
@@ -13,17 +14,7 @@ export const metadata: Metadata = {
 export default function Integrations() {
   return (
     <div className="lp">
-      <nav className="nav">
-        <a className="logo" href="/" aria-label="Uniq">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo.svg" alt="uniq." height={34} />
-        </a>
-        <div className="links">
-          <a href="/#how">How it works</a>
-          <a href="/pricing">Pricing</a>
-          <a className="gh" href="https://github.com/getuniq/uniq">GitHub ★</a>
-        </div>
-      </nav>
+      <SiteNav />
 
       <header className="hero" style={{ paddingBottom: "0.5rem" }}>
         <h1 style={{ fontSize: "clamp(2rem, 4.5vw, 3rem)" }}>Uniq owns the <em>proposal step</em>.<br />Your stack owns the rest.</h1>

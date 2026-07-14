@@ -4,6 +4,7 @@
 // gets the founder-brain context no crawler can extract. Platform-only.
 
 import { useEffect, useRef, useState } from "react";
+import SiteNav from "@/components/SiteNav";
 
 interface Msg { role: "user" | "assistant"; content: string }
 
@@ -41,13 +42,7 @@ export default function Refine() {
 
   return (
     <div className="lp">
-      <nav className="nav">
-        <a className="logo" href="/" aria-label="Uniq">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo.svg" alt="uniq." height={34} />
-        </a>
-        <div className="links"><a className="gh" href="/start">Get a key</a></div>
-      </nav>
+      <SiteNav />
 
       <header className="hero" style={{ paddingBottom: "1rem" }}>
         <h1 style={{ fontSize: "clamp(1.9rem, 4.5vw, 2.7rem)" }}>Sharpen your pitch.</h1>

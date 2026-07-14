@@ -16,6 +16,7 @@ interface ToolPage {
   // content
   headline: string; sub: string;
   motif: "table" | "datacard" | "terminal" | "workflow" | "inbox" | "crm";
+  layout: "cards" | "steps" | "split";
   benefits: Array<{ title: string; body: string }>;
   snippetTitle: string; snippet: string;
 }
@@ -23,6 +24,7 @@ interface ToolPage {
 const TOOLS: Record<string, ToolPage> = {
   clay: {
     name: "Clay", slug: "clay",
+    layout: "steps",
     bg: "#F4F1EA", ink: "#191919", brand: "#191919", soft: "#E8E2D5", radius: "6px", dark: false,
     headline: "The proposal column your Clay table is missing.",
     sub: "Your table already finds them, enriches them, scores them. Uniq is the column that turns each row into a closing kit — email + pitch + a hosted page in that prospect's own brand.",
@@ -42,6 +44,7 @@ Authorization: Bearer <saved header account>
   },
   apollo: {
     name: "Apollo", slug: "apollo",
+    layout: "cards",
     bg: "#12111F", ink: "#F3F2FA", brand: "#FCD34D", soft: "#1E1C33", radius: "12px", dark: true,
     headline: "Enriched by Apollo. Closed by Uniq.",
     sub: "Apollo tells you who they are. Uniq turns that into what they see: a personalized email and a proposal page in the prospect's own branding — generated from nothing but their URL.",
@@ -59,6 +62,7 @@ done
   },
   oxygen: {
     name: "Oxygen", slug: "oxygen",
+    layout: "split",
     bg: "#0A0E0B", ink: "#D7E4DA", brand: "#4ADE80", soft: "#111A14", radius: "8px", dark: true,
     headline: "your gtm cli researches.\nuniq closes.",
     sub: "Oxygen runs your GTM from Claude Code, Codex, and MCP agents. Uniq is the artifact tool-call in that loop — the step that turns agent research into something a buyer signs.",
@@ -76,6 +80,7 @@ done
   },
   n8n: {
     name: "n8n", slug: "n8n",
+    layout: "cards",
     bg: "#201A23", ink: "#F4EFF6", brand: "#EA4B71", soft: "#2C2430", radius: "14px", dark: true,
     headline: "The node between research and delivery.",
     sub: "Trigger on a new deal, a positive reply, a form fill — one HTTP Request node returns the full closing kit, and the next node delivers it. No custom node to install.",
@@ -94,6 +99,7 @@ Timeout 300000   # generation takes 30–90s`,
   },
   instantly: {
     name: "Instantly", slug: "instantly",
+    layout: "steps",
     bg: "#F5F8FF", ink: "#101828", brand: "#2F6BFF", soft: "#E3ECFF", radius: "16px", dark: false,
     headline: "Positive reply in. Branded proposal out.",
     sub: "The reply is the moment. Wire Instantly's reply webhook to Uniq and the follow-up carries a proposal page in the prospect's own brand — while the thread is still warm.",
@@ -112,6 +118,7 @@ Timeout 300000   # generation takes 30–90s`,
   },
   hubspot: {
     name: "HubSpot", slug: "hubspot",
+    layout: "split",
     bg: "#FFF9F6", ink: "#33475B", brand: "#FF7A59", soft: "#FFE9E1", radius: "10px", dark: false,
     headline: "Every deal stage deserves its own page.",
     sub: "A HubSpot workflow webhook turns 'deal created' into a proposal in the prospect's brand — attached to the record, tracked to the open.",
@@ -127,6 +134,109 @@ Timeout 300000   # generation takes 30–90s`,
   "prospectUrl": "{{company.domain}}",
   "webhookUrl": "{{hubspot workflow webhook}}" }
 → write proposalUrl to deal property`,
+  },
+  "claude-code": {
+    name: "Claude Code", slug: "claude-code", layout: "steps",
+    bg: "#16130E", ink: "#F2EDE4", brand: "#D97757", soft: "#241E15", radius: "10px", dark: true,
+    headline: "Your coding agent just became\nyour closing agent.",
+    sub: "One MCP link and Claude Code researches the prospect, generates the kit, edits it in conversation, and tells you the moment they open it.",
+    motif: "terminal",
+    benefits: [
+      { title: "One command to install", body: "claude mcp add — that's the whole setup. The tools appear in every session; your agent reads /llms.txt and knows the rest." },
+      { title: "Conversational editing built in", body: "\u201cShorten the email. Lead with ROI. Make pricing concrete.\u201d — edit_artifact regenerates one artifact, keeps the narrative." },
+      { title: "The follow-up loop closes itself", body: "proposal.viewed and proposal.question flow back — ask \u201cany views yet?\u201d mid-session or wire the webhook to your own automation." },
+    ],
+    snippetTitle: "The whole install",
+    snippet: `claude mcp add --transport http uniq https://uniq.team/api/mcp \\
+  --header "Authorization: Bearer $UNIQ_API_KEY"
+
+> "research acme.com, create a proposal, tell me when they open it"`,
+  },
+  cursor: {
+    name: "Cursor", slug: "cursor", layout: "split",
+    bg: "#0D0D10", ink: "#EDEDEF", brand: "#7DD3FC", soft: "#17171C", radius: "12px", dark: true,
+    headline: "Ship code all day.\nClose deals between builds.",
+    sub: "Uniq's MCP server drops into Cursor like any dev tool — founders who sell from their editor generate branded proposals without leaving it.",
+    motif: "terminal",
+    benefits: [
+      { title: "mcp.json and done", body: "Add one server entry with your key. Uniq's tools show up next to your linters — create_proposal is just another tool call." },
+      { title: "Founder-led sales, editor-native", body: "Prospect replied while you were debugging? Generate the kit in a side chat and paste the page link — 60 seconds, no context switch." },
+      { title: "Your product IS the pitch", body: "Uniq crawls your site for the seller profile — ship a feature, refresh the profile, and every next proposal sells the newest version." },
+    ],
+    snippetTitle: "mcp.json",
+    snippet: `{ "mcpServers": { "uniq": {
+    "url": "https://uniq.team/api/mcp",
+    "headers": { "Authorization": "Bearer uq_..." } } } }`,
+  },
+  smartlead: {
+    name: "Smartlead", slug: "smartlead", layout: "cards",
+    bg: "#F4F6FB", ink: "#111B33", brand: "#4F5DFF", soft: "#E5E9FB", radius: "14px", dark: false,
+    headline: "Your sequences warm them up.\nUniq closes them down.",
+    sub: "Smartlead owns deliverability at scale. When a reply lands, the follow-up carries a proposal page in the prospect's own brand — while the thread is hot.",
+    motif: "inbox",
+    benefits: [
+      { title: "Reply webhook → closing kit", body: "Point Smartlead's webhook at your automation, call Uniq with the replier's domain, answer on-thread with the branded page." },
+      { title: "First touch stays link-free", body: "Uniq's cold email carries proof and one stealable idea — no URLs. Your sender reputation and open rates stay intact." },
+      { title: "Intent flows back into the sequence", body: "proposal.viewed marks the hottest leads — branch your sequence on it instead of blasting day-3 follow-ups to everyone." },
+    ],
+    snippetTitle: "Reply webhook → Uniq",
+    snippet: `POST https://uniq.team/api/proposal
+{ "sellerUrl": "yoursaas.com",
+  "prospectUrl": "{{reply.company_domain}}",
+  "webhookUrl": "{{your automation webhook}}" }`,
+  },
+  make: {
+    name: "Make", slug: "make", layout: "steps",
+    bg: "#F7F3FB", ink: "#2A1B3D", brand: "#8B5CF6", soft: "#EDE4F8", radius: "16px", dark: false,
+    headline: "One HTTP module.\nA whole proposal studio.",
+    sub: "No custom app needed — Make's HTTP module calls Uniq and every scenario downstream gets the email, the pitch, and the branded page as clean JSON.",
+    motif: "workflow",
+    benefits: [
+      { title: "Drop-in HTTP module", body: "POST /api/proposal with two URLs; map proposalUrl, email.subject, email.body into any downstream module. 300s timeout, that's it." },
+      { title: "Trigger from anywhere", body: "New CRM deal, form fill, positive reply, Slack command — any Make trigger becomes a closing-kit generator." },
+      { title: "Webhooks complete the circuit", body: "proposal.viewed and proposal.question hit a Make webhook — route to Slack, CRM stage changes, or the follow-up scenario." },
+    ],
+    snippetTitle: "The HTTP module",
+    snippet: `Method  POST · URL  https://uniq.team/api/proposal
+Headers Authorization: Bearer {{env.UNIQ_API_KEY}}
+Body    { "sellerUrl": "yoursaas.com",
+          "prospectUrl": "{{1.company_domain}}" }`,
+  },
+  zapier: {
+    name: "Zapier", slug: "zapier", layout: "cards",
+    bg: "#FFF6F0", ink: "#201515", brand: "#FF4F00", soft: "#FFE9DC", radius: "10px", dark: false,
+    headline: "Zap in a lead.\nZap out a closing kit.",
+    sub: "Webhooks by Zapier is all it takes: any trigger in your 6,000-app universe becomes a branded proposal — and the open becomes your next trigger.",
+    motif: "workflow",
+    benefits: [
+      { title: "Webhooks by Zapier, twice", body: "Action: POST to /api/proposal with the lead's domain. Trigger: catch proposal.viewed / proposal.question and fan out anywhere." },
+      { title: "Works with your existing Zaps", body: "Typeform fill → proposal. Calendly booking → proposal before the call. CRM stage change → refreshed kit. No new tools to learn." },
+      { title: "Flat JSON out", body: "proposalUrl, email.subject, email.body — maps straight into Gmail drafts, Slack messages, or CRM notes without formatters." },
+    ],
+    snippetTitle: "Webhooks by Zapier — action",
+    snippet: `POST https://uniq.team/api/proposal
+Headers  Authorization: Bearer uq_...
+Data     sellerUrl: yoursaas.com
+         prospectUrl: {{company_domain}}
+         webhookUrl: {{catch-hook URL}}`,
+  },
+  attio: {
+    name: "Attio", slug: "attio", layout: "split",
+    bg: "#FAFAFA", ink: "#1A1A1A", brand: "#246BFE", soft: "#EBF1FF", radius: "12px", dark: false,
+    headline: "A proposal on every record.\nIntent on every open.",
+    sub: "Attio workflows call Uniq when a deal advances; the branded page lands back on the record, and opens move the pipeline for you.",
+    motif: "crm",
+    benefits: [
+      { title: "Workflow-native", body: "An Attio workflow webhook posts the company domain to Uniq and writes proposalUrl back to a record attribute — no middleware." },
+      { title: "Real-time intent on the timeline", body: "proposal.viewed and prospect questions land as timeline events — your team sees interest the moment it happens." },
+      { title: "Data stays clean", body: "One attribute, one URL, no attachments rotting in drives. The page is always the latest version — edits update it in place." },
+    ],
+    snippetTitle: "Attio workflow webhook",
+    snippet: `POST https://uniq.team/api/proposal
+{ "sellerUrl": "yoursaas.com",
+  "prospectUrl": "{{record.company.domain}}",
+  "webhookUrl": "{{attio webhook endpoint}}" }
+→ write proposalUrl to the deal record`,
   },
 };
 
@@ -222,7 +332,7 @@ export default async function ToolLanding({ params }: { params: Promise<{ tool: 
         .fp .chip { display: inline-block; font-size: 0.8rem; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: ${t.brand}; border: 1.5px solid ${t.brand}; border-radius: 999px; padding: 0.3rem 0.9rem; margin-bottom: 1.4rem; }
         .fp h1 { font-size: clamp(2.1rem, 5vw, 3.3rem); line-height: 1.08; letter-spacing: -1.5px; max-width: 700px; white-space: pre-line; }
         .fp .sub { font-size: 1.15rem; opacity: 0.82; max-width: 620px; margin-top: 1.2rem; }
-        .fp .benefits { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; padding: 2.5rem 0 0; }
+        .fp .benefits { padding: 2.5rem 0 0; }
         .fp .benefit { background: ${t.soft}; border-radius: ${t.radius}; padding: 1.4rem 1.5rem; transition: transform 0.25s ease; }
         .fp .benefit:hover { transform: translateY(-4px); }
         .fp .benefit h3 { font-size: 1.03rem; margin-bottom: 0.4rem; }
@@ -235,6 +345,16 @@ export default async function ToolLanding({ params }: { params: Promise<{ tool: 
         .fp .ctas .p { background: ${t.brand}; color: ${t.dark ? "#0b0d10" : "#fff"}; }
         .fp .ctas .g { border: 1.5px solid ${t.dark ? "rgba(255,255,255,0.35)" : t.ink}; color: ${t.ink}; }
         .fp .legal { font-size: 0.78rem; opacity: 0.55; padding-bottom: 2.5rem; }
+
+        /* layout variants — same content, three visibly different structures */
+        .fp .benefits.lay-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; }
+        .fp .benefits.lay-steps { display: flex; flex-direction: column; gap: 0; padding-top: 2rem; }
+        .fp .benefits.lay-steps .benefit { display: flex; gap: 1.1rem; background: transparent; border-left: 2px solid ${t.brand}44; border-radius: 0; padding: 1.1rem 0 1.1rem 1.4rem; margin-left: 1rem; position: relative; }
+        .fp .benefits.lay-steps .bstep { position: absolute; left: -1.05rem; top: 1.1rem; width: 2rem; height: 2rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; }
+        .fp .benefits.lay-split { display: flex; flex-direction: column; gap: 1rem; padding-top: 2rem; }
+        .fp .benefits.lay-split .benefit { display: grid; grid-template-columns: 1fr 2fr; gap: 1.2rem; align-items: start; }
+        .fp .benefits.lay-split .benefit h3 { font-size: 1.15rem; }
+        @media (max-width: 620px) { .fp .benefits.lay-split .benefit { grid-template-columns: 1fr; } }
 
         /* motifs */
         .fp .motif { margin-top: 2.6rem; }
@@ -284,11 +404,14 @@ export default async function ToolLanding({ params }: { params: Promise<{ tool: 
           <Motif t={t} />
         </header>
 
-        <section className="benefits">
+        <section className={`benefits lay-${t.layout}`}>
           {t.benefits.map((b, i) => (
             <div className="benefit reveal fp-reveal" key={i}>
-              <h3>{b.title}</h3>
-              <p>{b.body}</p>
+              {t.layout === "steps" && <span className="bstep" style={{ background: t.brand, color: t.dark ? "#0b0d10" : "#fff" }}>{i + 1}</span>}
+              <div>
+                <h3>{b.title}</h3>
+                <p>{b.body}</p>
+              </div>
             </div>
           ))}
         </section>

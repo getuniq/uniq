@@ -4,6 +4,7 @@
 // Checkout: Stripe payment links via env; until set, CTAs capture early access.
 
 import type { Metadata } from "next";
+import SiteNav from "@/components/SiteNav";
 
 export const metadata: Metadata = {
   title: "Pricing — Uniq",
@@ -27,17 +28,7 @@ export default function Pricing() {
   const starter = checkout("starter"), team = checkout("team"), scale = checkout("scale");
   return (
     <div className="lp">
-      <nav className="nav">
-        <a className="logo" href="/" aria-label="Uniq">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo.svg" alt="uniq." height={34} />
-        </a>
-        <div className="links">
-          <a href="/#how">How it works</a>
-          <a href="/integrations">Integrations</a>
-          <a className="gh" href="https://github.com/getuniq/uniq">GitHub ★</a>
-        </div>
-      </nav>
+      <SiteNav />
 
       <header className="hero" style={{ paddingBottom: "1rem" }}>
         <h1 style={{ fontSize: "clamp(2rem, 4.5vw, 3rem)" }}>Priced per proposal.<br /><em>You can do the math.</em></h1>
@@ -85,6 +76,51 @@ export default function Pricing() {
             </ul>
             <a className="cta ghosted" href={scale.href}>{scale.label}</a>
           </div>
+        </div>
+
+        <div className="cmp">
+          <h2 style={{ fontSize: "1.6rem", margin: "3rem 0 1rem" }}>Compare everything</h2>
+          <div className="cmp-table">
+            <div className="cmp-row cmp-head"><span>Feature</span><span>Self-host</span><span>Starter</span><span>Team</span><span>Scale</span></div>
+            {[
+              ["Proposals / month", "Unlimited*", "50", "150", "500"],
+              ["Generation engine (crawl → brand → 3 artifacts)", "✓", "✓", "✓", "✓"],
+              ["Prompt-based editing (edit_artifact)", "✓", "✓", "✓", "✓"],
+              ["MCP + REST + CLI", "✓ (yours)", "✓ managed", "✓ managed", "✓ managed"],
+              ["Hosted proposal pages", "your infra", "uniq.team", "your domain", "white-label"],
+              ["proposal.viewed / .question webhooks", "✓", "✓", "✓", "✓"],
+              ["Two-way pages (prospect questions)", "—", "✓", "✓", "✓"],
+              ["Pitch-refinement interviewer", "—", "✓", "✓", "✓"],
+              ["Dashboard (views + questions)", "—", "✓", "✓", "✓"],
+              ["Engagement analytics", "—", "basic", "full", "full"],
+              ["Users", "—", "1", "Unlimited", "Unlimited"],
+              ["Multi-brand (client campaigns)", "—", "—", "—", "✓"],
+              ["API rate limits", "yours", "60/hr", "60/hr", "high"],
+              ["Support", "community", "email", "priority", "priority"],
+            ].map((r, i) => (
+              <div className="cmp-row" key={i}>{r.map((c, j) => <span key={j}>{c}</span>)}</div>
+            ))}
+          </div>
+          <p className="demo-note" style={{ marginTop: "0.5rem" }}>* Unlimited on your own Anthropic key — you pay the model, not us.</p>
+        </div>
+
+        <div className="faq">
+          <h2 style={{ fontSize: "1.6rem", margin: "3rem 0 1rem" }}>Questions, answered</h2>
+          {[
+            ["What exactly is \u201cone proposal\u201d?", "One create_proposal call: the personalized email + the pitch HTML + the hosted branded page, all from one narrative. Edits to an existing proposal are free."],
+            ["Is the hosted version different from self-host?", "The generation engine is identical and AGPL. The cloud adds hosted pages, two-way questions, the interviewer, analytics, a managed MCP endpoint, and the dashboard."],
+            ["Do I need my own Anthropic key?", "Only if you self-host. Cloud plans include generation — the price you see is the price you pay."],
+            ["What happens when I hit my monthly cap?", "Generation pauses and we tell you (HTTP 402, politely). Upgrade a tier or wait for the reset — existing pages keep working and keep tracking."],
+            ["Can prospects tell it was AI-generated?", "Pages carry a slim Uniq bar on free/Starter tiers; Scale white-labels it away. The content itself is grounded in real research on the prospect — that's why it doesn't read like AI."],
+            ["Do unused proposals roll over?", "No — caps reset monthly. That's what keeps the per-proposal math honest."],
+            ["How do agents authenticate?", "The same API key, passed as a bearer header on MCP or REST. One key works across Claude Code, Cursor, Clay, n8n, and the CLI."],
+            ["Can I cancel any time?", "Yes. And because the engine is open source, you can always take your workflow and self-host — your seller profile is exportable."],
+          ].map(([q, a], i) => (
+            <details key={i} className="faq-item" open={i === 0}>
+              <summary>{q}</summary>
+              <p>{a}</p>
+            </details>
+          ))}
         </div>
 
         <p className="pricing-note">

@@ -350,3 +350,16 @@ body {
 .cr.total { background: var(--brand-soft); border-bottom: 0; font-weight: 700; }
 .cr.total span:nth-child(3) { color: var(--brand); }
 @media (max-width: 640px) { .cr { grid-template-columns: 1fr; gap: 0.15rem; } }
+
+/* ─── Pricing: comparison + FAQ ───────────────────────────────────────── */
+.cmp-table { border: 1px solid #e5e7eb; border-radius: 14px; overflow: hidden; background: #fff; overflow-x: auto; }
+.cmp-row { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr; gap: 0.5rem; padding: 0.7rem 1.1rem; border-bottom: 1px solid #f0f0f2; font-size: 0.92rem; min-width: 560px; }
+.cmp-row span:first-child { color: var(--ink); }
+.cmp-row span:not(:first-child) { color: var(--ink-soft); text-align: center; }
+.cmp-row.cmp-head { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 1.5px; text-transform: uppercase; background: #fafafa; color: var(--ink-soft); }
+.cmp-row:last-child { border-bottom: 0; }
+.faq-item { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 0.9rem 1.3rem; margin-bottom: 0.6rem; }
+.faq-item summary { cursor: pointer; font-weight: 600; list-style: none; display: flex; justify-content: space-between; align-items: center; }
+.faq-item summary::after { content: "+"; font-size: 1.3rem; color: var(--brand); transition: transform 0.2s var(--ease-out); }
+.faq-item[open] summary::after { transform: rotate(45deg); }
+.faq-item p { color: var(--ink-soft); font-size: 0.95rem; margin-top: 0.6rem; }

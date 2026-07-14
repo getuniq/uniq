@@ -7,6 +7,7 @@
 // No password, no verification wall — the key is the credential (v0).
 
 import { useState } from "react";
+import SiteNav from "@/components/SiteNav";
 import StagedLoader from "@/components/StagedLoader";
 
 interface Profile { domain: string; logo: string | null; colors: string[]; profile: { company: string; one_liner: string; value_props: string[]; proof_points: string[]; tone: string } }
@@ -72,13 +73,7 @@ export default function Start() {
 
   return (
     <div className="lp start">
-      <nav className="nav">
-        <a className="logo" href="/" aria-label="Uniq">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo.svg" alt="uniq." height={34} />
-        </a>
-        <div className="links"><a className="gh" href="https://github.com/getuniq/uniq">GitHub ★</a></div>
-      </nav>
+      <SiteNav />
 
       <header className="hero" style={{ paddingBottom: "1rem" }}>
         <h1 style={{ fontSize: "clamp(1.9rem, 4.5vw, 2.8rem)" }}>{account ? "You're in." : "Start with your website."}</h1>

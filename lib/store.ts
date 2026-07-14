@@ -101,6 +101,10 @@ export async function recordView(id: string): Promise<void> {
   // it → follow up"). Fired on the FIRST view only; best-effort.
   if (firstView) {
     const p = await getProposal(id);
+    if (p) {
+      const { notifyTelegram } = await import("./notify");
+      void notifyTelegram(`👀 <b>Proposal opened</b> — ${p.prospect_domain} (${p.seller_domain})\nhttps://uniq.team/p/${id}`);
+    }
     if (p?.webhook_url) {
       fetch(p.webhook_url, {
         method: "POST",

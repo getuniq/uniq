@@ -5,6 +5,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getProposal, newId } from "@/lib/store";
 import { createClient } from "@supabase/supabase-js";
+import { notifyTelegram } from "@/lib/notify";
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
   const body = await req.json().catch(() => ({})) as { id?: string; question?: string; email?: string };
@@ -43,6 +44,11 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       signal: AbortSignal.timeout(5000),
     }).catch(() => undefined);
   }
+
+  void notifyTelegram(
+    `❓ <b>Proposal question</b> — ${p.prospect_domain}\n"${q.slice(0, 300)}"\n` +
+    `${body.email ? `from ${body.email}\n` : ""}https://uniq.team/p/${body.id}`,
+  );
 
   return NextResponse.json({ ok: true, message: `${p.seller_profile.company} will get back to you shortly.` });
 }
