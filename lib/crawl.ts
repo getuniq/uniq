@@ -13,6 +13,7 @@ export interface CrawledSite {
   logoCandidates: string[];  // absolute URLs, best-first
   colorCandidates: string[]; // hex colors by frequency, best-first
   fontCandidates: string[];  // font-family names encountered
+  ctaLinks: Array<{ label: string; url: string }>; // real pricing/contact/signup links
 }
 
 const UA = "Mozilla/5.0 (compatible; UniqBot/0.1; +https://uniq.team)";
@@ -193,6 +194,27 @@ export async function crawlSite(inputUrl: string): Promise<CrawledSite> {
   let text = stripToText(html);
   for (const st of subTexts) if (st.status === "fulfilled") text += `\n\n---\n${st.value}`;
 
+  // Real CTA links — the seller's own "where do I sign" destinations
+  // (pricing / contact / start free / book a demo), same-origin only.
+  const CTA_RE = /^(pricing|plans?|contact( us| sales)?|talk to (us|sales)|book (a )?(demo|call)|get (a )?demo|request (a )?demo|start( for)? free|get started|sign ?up|try (it )?(free|now))$/i;
+  const ctaTally = new Map<string, { label: string; url: string; n: number }>();
+  for (const m of html.matchAll(/<a[^>]+href=["']([^"']+)["'][^>]*>([\s\S]{0,120}?)<\/a>/gi)) {
+    const label = stripToText(m[2]).slice(0, 40).trim();
+    if (!label || !CTA_RE.test(label)) continue;
+    const a = absolute(m[1], url);
+    if (!a) continue;
+    try {
+      const u = new URL(a);
+      if (u.origin !== base.origin && !u.hostname.endsWith(base.hostname.replace(/^www\./, ""))) continue;
+      const k = label.toLowerCase();
+      const cur = ctaTally.get(k);
+      if (cur) cur.n++;
+      else ctaTally.set(k, { label, url: u.toString(), n: 1 });
+    } catch { /* skip */ }
+  }
+  const ctaLinks = [...ctaTally.values()].sort((a, b) => b.n - a.n).slice(0, 3)
+    .map(({ label, url }) => ({ label, url }));
+
   const colorCandidates = [...colorTally.entries()]
     .sort((a, b) => b[1] - a[1])
     .slice(0, 8)
@@ -208,5 +230,6 @@ export async function crawlSite(inputUrl: string): Promise<CrawledSite> {
     logoCandidates: logoCandidates.slice(0, 4),
     colorCandidates,
     fontCandidates: [...fonts].slice(0, 6),
+    ctaLinks,
   };
 }

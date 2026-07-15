@@ -23,6 +23,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       pickLogo(site.logoCandidates.slice(0, 4)),
     ]);
     profile.brand = { primary_color: site.colorCandidates[0] ?? "#111827", logo_url: logo };
+    profile.ctas = site.ctaLinks;
     await saveSellerProfile(site.domain, profile);
     return NextResponse.json({
       domain: site.domain,

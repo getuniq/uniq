@@ -50,6 +50,7 @@ export async function createProposal(input: CreateProposalInput): Promise<Create
       primary_color: sellerSite.colorCandidates[0] ?? "#111827",
       logo_url: await pickLogo(sellerSite.logoCandidates.slice(0, 4)),
     };
+    seller.ctas = sellerSite.ctaLinks;
     await saveSellerProfile(sellerDomain, seller);
   }
 

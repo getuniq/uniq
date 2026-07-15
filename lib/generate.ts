@@ -25,6 +25,9 @@ export const SellerProfileSchema = z.object({
     primary_color: z.string(),
     logo_url: z.string().nullable(),
   }).optional(),
+  // The seller's own conversion links (pricing / contact / start free),
+  // captured from their site — rendered as real buttons on the proposal.
+  ctas: z.array(z.object({ label: z.string(), url: z.string() })).optional(),
 });
 export type SellerProfile = z.infer<typeof SellerProfileSchema>;
 
@@ -42,6 +45,43 @@ export const ProspectBriefSchema = z.object({
 });
 export type ProspectBrief = z.infer<typeof ProspectBriefSchema>;
 
+// ─── The product experience — a simulated "you've already integrated it" block.
+// The LLM picks the kind that matches what the seller SELLS, then fills it with
+// buyer-specific content. The renderer draws each kind as a rich visual.
+const DemoChat = z.object({
+  kind: z.literal("chat"),                       // conversational products (agents, support, chat apps)
+  title: z.string(),
+  messages: z.array(z.object({ from: z.enum(["buyer", "product"]), text: z.string() })).min(3).max(7),
+});
+const DemoDashboard = z.object({
+  kind: z.literal("dashboard"),                  // analytics / data / monitoring products
+  title: z.string(),
+  metrics: z.array(z.object({ label: z.string(), value: z.string(), delta: z.string().optional() })).min(2).max(4),
+  feed: z.array(z.object({ title: z.string(), meta: z.string(), status: z.string() })).min(2).max(5),
+});
+const DemoWorkflow = z.object({
+  kind: z.literal("workflow"),                   // orchestration / automation / pipeline products
+  title: z.string(),
+  steps: z.array(z.object({ name: z.string(), detail: z.string(), status: z.enum(["done", "active", "next"]) })).min(3).max(6),
+});
+const DemoMockup = z.object({
+  kind: z.literal("mockup"),                     // websites / pages / design / creative products
+  title: z.string(),
+  nav: z.array(z.string()).min(2).max(5),
+  hero_headline: z.string(),
+  hero_sub: z.string(),
+  hero_cta: z.string(),
+  cards: z.array(z.object({ title: z.string(), body: z.string() })).max(3),
+});
+const DemoReport = z.object({
+  kind: z.literal("report"),                     // security / audit / assessment / consulting products
+  title: z.string(),
+  score: z.string().optional(),
+  findings: z.array(z.object({ area: z.string(), finding: z.string(), level: z.enum(["good", "warn", "critical"]) })).min(3).max(6),
+});
+export const DemoSchema = z.discriminatedUnion("kind", [DemoChat, DemoDashboard, DemoWorkflow, DemoMockup, DemoReport]);
+export type Demo = z.infer<typeof DemoSchema>;
+
 export const ClosingKitSchema = z.object({
   narrative: z.string(),                // the single thesis all 3 artifacts share
   email: z.object({
@@ -58,6 +98,10 @@ export const ClosingKitSchema = z.object({
     stats: z.array(z.object({ value: z.string(), label: z.string() })).max(3).optional(),
     problem: z.object({ title: z.string(), body: z.string() }),
     solution: z.object({ title: z.string(), body: z.string() }),
+    // The centerpiece: the seller's product, simulated as if the buyer already runs it.
+    demo: DemoSchema.optional(),
+    // How the two companies click — buyer asset → seller capability → outcome.
+    synergy: z.array(z.object({ yours: z.string(), ours: z.string(), outcome: z.string() })).max(3).optional(),
     deliverables: z.array(z.object({ title: z.string(), body: z.string() })).min(2).max(5),
     proof: z.array(z.string()).max(4),
     objections: z.array(z.object({ q: z.string(), a: z.string() })).max(3).optional(),
@@ -225,6 +269,25 @@ Return JSON:
        from the seller profile or prospect context; omit entirely if nothing honest fits,
     "problem": { "title", "body" (2-3 sentences naming THEIR specific pain — their words, their stack) },
     "solution": { "title", "body" (how the offer lands in their world) },
+    "demo": THE CENTERPIECE — simulate ${seller.company}'s actual product ALREADY RUNNING for
+       ${prospect.company}, so the buyer feels integrated before they reply. Pick ONE kind by what
+       the seller sells:
+       · "chat" (conversational products/agents): { "kind":"chat", "title" (e.g. "${prospect.company}'s assistant — live"),
+         "messages": 3-7 alternating {"from":"buyer"|"product","text"} — a REAL conversation their
+         customer/team would have, using ${prospect.company}'s actual products and language },
+       · "dashboard" (data/analytics/monitoring): { "kind":"dashboard", "title", "metrics": 2-4
+         {"label","value","delta"?}, "feed": 2-5 {"title","meta","status"} — rows referencing THEIR
+         actual products, campaigns, or pages },
+       · "workflow" (orchestration/automation/GTM): { "kind":"workflow", "title", "steps": 3-6
+         {"name","detail","status":"done"|"active"|"next"} — THEIR real motion flowing through it },
+       · "mockup" (websites/pages/design): { "kind":"mockup", "title", "nav": THEIR site sections,
+         "hero_headline"/"hero_sub"/"hero_cta" written as ${prospect.company}'s new page, "cards": up to 3 },
+       · "report" (security/audit/assessment): { "kind":"report", "title", "score"?, "findings": 3-6
+         {"area","finding","level":"good"|"warn"|"critical"} — plausible, specific to THEIR surface }.
+       Numbers may be illustrative but must be PLAUSIBLE for their size/stage (the page labels the
+       block "simulated preview"). Every string must be specific to ${prospect.company} — zero generic filler.,
+    "synergy": 3 rows of { "yours" (a real ${prospect.company} asset/goal), "ours" (the ${seller.company}
+       capability that plugs into it), "outcome" (the concrete result) } — the "why these two companies" map,
     "deliverables": 2-5 items { "title", "body" } — concrete, scoped,
     "proof": up to 4 proof points (only real ones from the seller profile) — placed right before the ask,
     "objections": 2-3 { "q", "a" } — the REAL objections ${prospect.company} would raise

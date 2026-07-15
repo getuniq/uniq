@@ -8,6 +8,7 @@ import { getProposal, recordView } from "@/lib/store";
 import ProposalFx from "@/components/ProposalFx";
 import BrandLogo from "@/components/BrandLogo";
 import AskBox from "@/components/AskBox";
+import ProductDemo from "@/components/ProductDemo";
 import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
@@ -162,6 +163,67 @@ export default async function ProposalPage({ params }: Props) {
         .pp .uniqbar .ub-cta { color: #a78bfa; font-weight: 700; text-decoration: none; white-space: nowrap; }
         .pp .uniqbar .ub-cta:hover { color: #c4b5fd; }
 
+        /* product experience */
+        .pp .pdemo { margin-top: 1.4rem; border-radius: 14px; overflow: hidden; border: 1px solid ${V.line}; box-shadow: 0 18px 50px ${tint(primary, variant === "midnight" ? 0.25 : 0.1)}; background: ${V.cardBg}; }
+        .pp .pd-chrome { display: flex; align-items: center; gap: 6px; padding: 0.6rem 1rem; background: ${variant === "midnight" ? "#0a0c10" : "#f4f4f6"}; border-bottom: 1px solid ${V.line}; }
+        .pp .pd-chrome i { width: 10px; height: 10px; border-radius: 50%; background: ${variant === "midnight" ? "#ffffff22" : "#d4d4d8"}; }
+        .pp .pd-url { margin-left: 0.6rem; font-family: ui-monospace, Menlo, monospace; font-size: 0.72rem; color: ${V.soft}; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .pp .pd-sim { font-size: 0.66rem; letter-spacing: 1px; text-transform: uppercase; color: ${V.soft}; border: 1px solid ${V.line}; border-radius: 999px; padding: 0.15rem 0.6rem; white-space: nowrap; }
+        .pp .pd-body { padding: 1.2rem 1.4rem 1.5rem; }
+        .pp .pd-title { font-family: ${font}; font-weight: 700; margin-bottom: 1rem; color: ${V.ink}; }
+        .pp .pd-chat { display: flex; flex-direction: column; gap: 0.5rem; max-width: 560px; }
+        .pp .pd-msg { border-radius: 14px; padding: 0.65rem 1rem; font-size: 0.93rem; max-width: 85%; margin: 0; }
+        .pp .pd-msg.buyer { background: ${variant === "midnight" ? "#1a1e28" : "#f1f1f4"}; color: ${V.ink}; align-self: flex-end; }
+        .pp .pd-msg.product { align-self: flex-start; }
+        .pp .pd-typing { display: flex; gap: 4px; padding: 0.4rem 0.6rem; margin: 0; }
+        .pp .pd-typing i { width: 6px; height: 6px; border-radius: 50%; animation: pd-blink 1.2s infinite; }
+        .pp .pd-typing i:nth-child(2) { animation-delay: 0.2s; } .pp .pd-typing i:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes pd-blink { 0%, 60%, 100% { opacity: 0.25 } 30% { opacity: 1 } }
+        .pp .pd-metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 0.8rem; margin-bottom: 1rem; }
+        .pp .pd-metric { border: 1px solid ${V.line}; border-radius: 10px; padding: 0.8rem 1rem; }
+        .pp .pd-metric b { display: block; font-family: ${font}; font-size: 1.5rem; letter-spacing: -0.5px; }
+        .pp .pd-metric span { font-size: 0.78rem; color: ${V.soft}; }
+        .pp .pd-metric em { display: block; font-style: normal; font-size: 0.78rem; font-weight: 700; }
+        .pp .pd-feed .pd-row { display: flex; gap: 0.8rem; align-items: baseline; padding: 0.55rem 0.2rem; border-top: 1px solid ${V.line}; font-size: 0.9rem; }
+        .pp .pd-row-t { flex: 1; color: ${V.ink}; font-weight: 600; }
+        .pp .pd-row-m { color: ${V.soft}; font-size: 0.8rem; }
+        .pp .pd-row-s { font-weight: 700; font-size: 0.8rem; white-space: nowrap; }
+        .pp .pd-flow { display: flex; flex-direction: column; gap: 0; }
+        .pp .pd-step { display: flex; gap: 1rem; padding: 0.8rem 0 0.8rem 1.2rem; border-left: 2.5px solid ${V.line}; margin-left: 0.9rem; position: relative; }
+        .pp .pd-step-dot { position: absolute; left: -1rem; top: 0.85rem; width: 1.9rem; height: 1.9rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 800; font-size: 0.8rem; }
+        .pp .pd-step b { font-family: ${font}; color: ${V.ink}; }
+        .pp .pd-step p { margin: 0.15rem 0 0; font-size: 0.88rem; color: ${V.soft}; }
+        .pp .pd-step.next { opacity: 0.55; }
+        .pp .pd-mock { border: 1px solid ${V.line}; border-radius: 10px; overflow: hidden; }
+        .pp .pd-mock-nav { display: flex; gap: 1.1rem; align-items: center; padding: 0.7rem 1.1rem; font-size: 0.82rem; color: ${V.soft}; border-bottom: 1px solid ${V.line}; }
+        .pp .pd-mock-hero { color: #fff; padding: 2rem 1.4rem; }
+        .pp .pd-mock-hero h4 { font-family: ${font}; font-size: 1.4rem; letter-spacing: -0.5px; margin: 0 0 0.4rem; }
+        .pp .pd-mock-hero p { margin: 0 0 1rem; opacity: 0.9; font-size: 0.92rem; max-width: 420px; }
+        .pp .pd-mock-cta { background: #fff; border-radius: 8px; padding: 0.5rem 1.1rem; font-weight: 700; font-size: 0.88rem; display: inline-block; }
+        .pp .pd-mock-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0.8rem; padding: 1rem 1.1rem; }
+        .pp .pd-mock-cards > div { border: 1px solid ${V.line}; border-radius: 8px; padding: 0.8rem 0.9rem; font-size: 0.85rem; }
+        .pp .pd-mock-cards b { display: block; margin-bottom: 0.25rem; color: ${V.ink}; }
+        .pp .pd-mock-cards p { margin: 0; color: ${V.soft}; }
+        .pp .pd-report .pd-finding { display: flex; gap: 0.9rem; padding: 0.7rem 0; border-top: 1px solid ${V.line}; }
+        .pp .pd-score { display: inline-block; border: 2.5px solid; border-radius: 12px; font-family: ${font}; font-size: 1.6rem; font-weight: 800; padding: 0.4rem 1.1rem; margin-bottom: 0.9rem; }
+        .pp .pd-level { width: 1.7rem; height: 1.7rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; color: #fff; flex-shrink: 0; }
+        .pp .pd-level.good { background: #10b981; } .pp .pd-level.warn { background: #f59e0b; } .pp .pd-level.critical { background: #ef4444; }
+        .pp .pd-finding b { font-family: ${font}; color: ${V.ink}; }
+        .pp .pd-finding p { margin: 0.1rem 0 0; font-size: 0.9rem; color: ${V.soft}; }
+
+        /* synergy map */
+        .pp .syn { border: 1px solid ${V.line}; border-radius: 14px; overflow: hidden; background: ${V.cardBg}; margin-top: 1rem; }
+        .pp .syn-row { display: grid; grid-template-columns: 1fr 1fr 1.2fr; gap: 0.8rem; padding: 0.85rem 1.2rem; border-bottom: 1px solid ${V.line}; font-size: 0.93rem; }
+        .pp .syn-row:last-child { border-bottom: 0; }
+        .pp .syn-head { font-family: ui-monospace, Menlo, monospace; font-size: 0.7rem; letter-spacing: 1.5px; text-transform: uppercase; color: ${V.soft}; background: ${variant === "midnight" ? "#0a0c10" : "#fafafa"}; }
+        .pp .syn-out { color: ${variant === "midnight" ? accent : primary}; font-weight: 600; }
+        @media (max-width: 620px) { .pp .syn-row { grid-template-columns: 1fr; gap: 0.2rem; } }
+
+        /* real seller CTA links */
+        .pp .ctalinks { margin-top: 1.3rem; font-size: 0.92rem; color: ${V.soft}; }
+        .pp .ctalinks a { display: inline-block; margin: 0.3rem 0.3rem 0; border: 1.5px solid ${tint(primary, variant === "midnight" ? 0.6 : 0.4)}; color: ${variant === "midnight" ? accent : primary}; border-radius: 999px; padding: 0.4rem 1.1rem; text-decoration: none; font-weight: 700; }
+        .pp .ctalinks a:hover { background: ${tint(primary, 0.08)}; }
+
         .js .pp-reveal { opacity: 0; transform: translateY(22px); transition: opacity 0.6s ease, transform 0.6s ease; }
         .js .pp-reveal.in { opacity: 1; transform: none; }
         @media (prefers-reduced-motion: reduce) {
@@ -216,6 +278,26 @@ export default async function ProposalPage({ params }: Props) {
           <p className="prose">{pr.solution.body}</p>
         </section>
 
+        {pr.demo && (
+          <section className="reveal pp-reveal">
+            <h2>{p.prospect_brief.company}, already running {seller.company}</h2>
+            <ProductDemo demo={pr.demo} primary={primary} accent={accent}
+              sellerName={seller.company} buyerName={p.prospect_brief.company} logo={b.logo_url} />
+          </section>
+        )}
+
+        {pr.synergy && pr.synergy.length > 0 && (
+          <section className="reveal pp-reveal">
+            <h2>Why these two companies click</h2>
+            <div className="syn">
+              <div className="syn-row syn-head"><span>You bring</span><span>{seller.company} plugs in</span><span>Together</span></div>
+              {pr.synergy.map((r, i) => (
+                <div className="syn-row" key={i}><span>{r.yours}</span><span>{r.ours}</span><span className="syn-out">{r.outcome}</span></div>
+              ))}
+            </div>
+          </section>
+        )}
+
         <section className="reveal pp-reveal">
           <div className="cards">
             {pr.deliverables.map((d, i) => (
@@ -267,6 +349,14 @@ export default async function ProposalPage({ params }: Props) {
             {pr.cta.label}
           </a>
           <p className="ctasub">{pr.cta.sub}</p>
+          {seller.ctas && seller.ctas.length > 0 && (
+            <p className="ctalinks">
+              or go straight to {seller.company}:{" "}
+              {seller.ctas.map((c, i) => (
+                <a key={i} href={c.url} target="_blank" rel="noreferrer">{c.label}</a>
+              ))}
+            </p>
+          )}
         </div>
 
         <div className="reveal pp-reveal" style={{ paddingBottom: "3rem" }}>
