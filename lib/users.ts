@@ -16,10 +16,11 @@ export interface UniqUser {
   verify_code?: string | null;
 }
 
-/** Send the 6-digit verification code via Resend (best-effort; env-gated). */
-async function sendVerifyEmail(email: string, code: string): Promise<boolean> {
+/** Send the 6-digit verification code via Resend.
+ *  "sent" | "no-mailer" (env unset — self-host) | "failed" (mailer errored — surface it!) */
+async function sendVerifyEmail(email: string, code: string): Promise<"sent" | "no-mailer" | "failed"> {
   const key = process.env.RESEND_API_KEY;
-  if (!key) return false; // no mailer configured → caller falls back to auto-verify
+  if (!key) return "no-mailer";
   try {
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
@@ -36,8 +37,10 @@ Paste it back on uniq.team/start and your API key is yours.
       }),
       signal: AbortSignal.timeout(10000),
     });
-    return res.ok;
-  } catch { return false; }
+    if (res.ok) return "sent";
+    console.error("[signup] Resend refused:", res.status, (await res.text().catch(() => "")).slice(0, 200));
+    return "failed";
+  } catch (e) { console.error("[signup] Resend error:", e); return "failed"; }
 }
 
 function supa(): SupabaseClient | null {
@@ -59,7 +62,8 @@ export async function signupUser(email: string, domain: string): Promise<UniqUse
     const user = existing as UniqUser;
     const code = String(Math.floor(100000 + Math.random() * 900000));
     const sent = await sendVerifyEmail(clean, code);
-    if (!sent) return user; // no mailer configured → self-host convenience
+    if (sent === "no-mailer") return user; // self-host without email
+    if (sent === "failed") throw new Error("We couldn't send your login code — try again in a minute.");
     await db.from("uniq_users").update({ verify_code: code }).eq("id", user.id);
     return { ...user, verify_code: code, verified: false }; // signal: code required
   }
@@ -76,7 +80,8 @@ export async function signupUser(email: string, domain: string): Promise<UniqUse
     verify_code: code,
   };
   const sent = await sendVerifyEmail(clean, code);
-  if (!sent) { user.verified = true; user.verify_code = null; } // no mailer → don't lock users out
+  if (sent === "no-mailer") { user.verified = true; user.verify_code = null; } // self-host without email
+  if (sent === "failed") throw new Error("We couldn't send your verification email — try again in a minute.");
   const { error } = await db.from("uniq_users").insert(user);
   if (error) throw new Error(`Signup failed: ${error.message}`);
   return user;
